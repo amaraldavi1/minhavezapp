@@ -1,24 +1,25 @@
-import { Routes, Route } from 'react-router-dom'
-import Home from './pages/Home.jsx'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import Landing from './pages/Landing.jsx'
+import OwnerLogin from './pages/OwnerLogin.jsx'
+import OwnerPanel from './pages/OwnerPanel.jsx'
 import ClientView from './pages/ClientView.jsx'
-import AttendantLogin from './pages/AttendantLogin.jsx'
-import AttendantView from './pages/AttendantView.jsx'
-import ProtectedRoute from './components/ProtectedRoute.jsx'
+import RequireAuth from './auth/RequireAuth.jsx'
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/cliente" element={<ClientView />} />
-      <Route path="/atendente/login" element={<AttendantLogin />} />
+      <Route path="/" element={<Landing />} />
+      <Route path="/fila/:bakeryId" element={<ClientView />} />
+      <Route path="/painel/login" element={<OwnerLogin />} />
       <Route
-        path="/atendente"
+        path="/painel"
         element={
-          <ProtectedRoute>
-            <AttendantView />
-          </ProtectedRoute>
+          <RequireAuth>
+            <OwnerPanel />
+          </RequireAuth>
         }
       />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }

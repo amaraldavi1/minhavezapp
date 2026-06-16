@@ -1,0 +1,42 @@
+{
+  "rules": {
+    "bakeries": {
+      "$bid": {
+        ".read": true,
+
+        "info": {
+          ".write": "auth != null && newData.child('ownerUid').val() === auth.uid && (!data.exists() || data.child('ownerUid').val() === auth.uid)",
+          "name": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60" },
+          "ownerUid": { ".validate": "newData.isString()" },
+          "createdAt": { ".validate": "newData.isNumber()" }
+        },
+
+        "state": {
+          "currentlyServing": {
+            ".write": "auth != null && root.child('bakeries').child($bid).child('info').child('ownerUid').val() === auth.uid",
+            ".validate": "newData.isNumber() || newData.val() === null"
+          },
+          "nextTicketNumber": {
+            ".write": "auth != null && (root.child('bakeries').child($bid).child('info').child('ownerUid').val() === auth.uid || (data.exists() && newData.val() === data.val() + 1))",
+            ".validate": "newData.isNumber() && newData.val() >= 1"
+          }
+        },
+
+        "waiting": {
+          ".write": "auth != null",
+          "$ticket": {
+            "number": { ".validate": "newData.isNumber()" },
+            "joinedAt": { ".validate": "newData.isNumber()" }
+          }
+        }
+      }
+    },
+
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    }
+  }
+}
