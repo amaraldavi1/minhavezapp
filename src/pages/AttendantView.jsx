@@ -70,6 +70,11 @@ export default function AttendantView() {
     })
   }
 
+  function handleLogout() {
+    logout()
+    navigate('/atendente/login', { replace: true })
+  }
+
   if (!queueData) {
     return (
       <div className="loading">
@@ -81,90 +86,99 @@ export default function AttendantView() {
 
   const totalWaiting = sortedWaiting.length
   const hasNext = totalWaiting > 0
+  const isServing = currentlyServing !== null
 
   return (
-    <div className="attendant-view">
-      <div className="attendant-header">
-        <div>
-          <h1 className="attendant-title">Painel da Atendente</h1>
-          <p className="attendant-sub">🏪 Gerenciamento de fila</p>
+    <div className="att-wrapper">
+      {/* ── Scrollable content ── */}
+      <div className="att-content">
+
+        {/* Header */}
+        <div className="att-header">
+          <div className="att-header-left">
+            <h1 className="att-title">Painel</h1>
+            <span className="att-badge">
+              {totalWaiting} aguardando
+            </span>
+          </div>
+          <button className="att-logout-btn" onClick={handleLogout} title="Sair">
+            🚪 Sair
+          </button>
         </div>
-        <div className="waiting-badge">
-          {totalWaiting} {totalWaiting === 1 ? 'aguardando' : 'aguardando'}
+
+        {/* Currently serving */}
+        <div className={`att-serving-card ${isServing ? 'att-serving-active' : ''}`}>
+          <span className="att-serving-label">Atendendo agora</span>
+          {isServing ? (
+            <span className="att-serving-number">#{currentlyServing}</span>
+          ) : (
+            <>
+              <span className="att-serving-dash">—</span>
+              <span className="att-serving-hint">
+                {hasNext ? 'Chame o próximo cliente abaixo ↓' : 'Nenhum cliente na fila'}
+              </span>
+            </>
+          )}
         </div>
+
+        {/* Queue list */}
+        <div className="att-queue-section">
+          <div className="att-queue-header">
+            Fila de espera &mdash; {totalWaiting} {totalWaiting === 1 ? 'pessoa' : 'pessoas'}
+          </div>
+          {totalWaiting === 0 ? (
+            <div className="att-queue-empty">
+              <span>😊</span>
+              <p>Nenhum cliente aguardando</p>
+            </div>
+          ) : (
+            <ul className="att-queue-list">
+              {sortedWaiting.map((ticket, index) => (
+                <li
+                  key={ticket.number}
+                  className={`att-queue-item ${index === 0 ? 'att-queue-next' : ''}`}
+                >
+                  <span className="att-queue-pos">{index + 1}º</span>
+                  <span className="att-queue-num">#{ticket.number}</span>
+                  {index === 0 && <span className="att-next-tag">próximo</span>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Reset — secondary action, bottom of scroll */}
+        <button className="att-reset-btn" onClick={resetQueue}>
+          🔄 Resetar fila
+        </button>
+
       </div>
 
-      {/* Currently Serving Card */}
-      <div className={`serving-card ${currentlyServing ? 'serving-active' : ''}`}>
-        <span className="serving-label">Atendendo Agora</span>
-        {currentlyServing ? (
-          <span className="serving-number">#{currentlyServing}</span>
-        ) : (
-          <span className="serving-empty">—</span>
-        )}
-      </div>
-
-      {/* Action Buttons */}
-      <div className="action-area">
-        {!currentlyServing ? (
+      {/* ── Fixed bottom action bar ── */}
+      <div className="att-action-bar">
+        {!isServing ? (
           <button
-            className="btn btn-primary w-full"
+            className={`att-fab ${hasNext ? 'att-fab-amber' : 'att-fab-idle'}`}
             onClick={callNext}
             disabled={!hasNext || busy}
           >
-            📢 Chamar Próximo
+            <span className="att-fab-icon">📢</span>
+            <span className="att-fab-label">
+              {busy ? 'Aguarde...' : hasNext ? 'Chamar Próximo' : 'Fila vazia'}
+            </span>
           </button>
         ) : (
           <button
-            className="btn btn-success w-full"
+            className="att-fab att-fab-green"
             onClick={markAsServed}
             disabled={busy}
           >
-            ✅ Marcar como Atendido
+            <span className="att-fab-icon">✅</span>
+            <span className="att-fab-label">
+              {busy ? 'Aguarde...' : 'Marcar como Atendido'}
+            </span>
           </button>
         )}
-      </div>
-
-      {/* Queue List */}
-      <div className="queue-list-section">
-        <div className="queue-list-header">
-          Fila de espera — {totalWaiting} {totalWaiting === 1 ? 'pessoa' : 'pessoas'}
-        </div>
-        {totalWaiting === 0 ? (
-          <div className="queue-empty-msg">
-            <span>😊</span>
-            <p>Nenhum cliente aguardando</p>
-          </div>
-        ) : (
-          <ul className="queue-list">
-            {sortedWaiting.map((ticket, index) => (
-              <li
-                key={ticket.number}
-                className={`queue-item ${index === 0 ? 'queue-item-next' : ''}`}
-              >
-                <span className="queue-pos">{index + 1}º</span>
-                <span className="queue-ticket-num">#{ticket.number}</span>
-                {index === 0 && <span className="next-tag">próximo</span>}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Bottom actions */}
-      <div className="bottom-actions">
-        <button className="btn btn-danger w-full" onClick={resetQueue}>
-          🔄 Resetar Fila
-        </button>
-        <button
-          className="btn btn-ghost logout-btn"
-          onClick={() => {
-            logout()
-            navigate('/atendente/login', { replace: true })
-          }}
-        >
-          🚪 Sair
-        </button>
       </div>
     </div>
   )
