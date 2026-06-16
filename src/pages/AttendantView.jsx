@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { ref, onValue, update, set } from 'firebase/database'
 import { db } from '../firebase'
 import { useNavigate } from 'react-router-dom'
+import { logout } from '../components/ProtectedRoute'
 
 function padTicket(n) {
   return String(n).padStart(4, '0')
@@ -155,8 +156,14 @@ export default function AttendantView() {
         <button className="btn btn-danger w-full" onClick={resetQueue}>
           🔄 Resetar Fila
         </button>
-        <button className="btn btn-ghost" onClick={() => navigate('/')}>
-          ← Voltar
+        <button
+          className="btn btn-ghost logout-btn"
+          onClick={() => {
+            logout()
+            navigate('/atendente/login', { replace: true })
+          }}
+        >
+          🚪 Sair
         </button>
       </div>
     </div>
