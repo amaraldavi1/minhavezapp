@@ -25,9 +25,14 @@ export function sortWaiting(waiting) {
   return Object.values(waiting ?? {}).sort((a, b) => a.number - b.number)
 }
 
-/** Reads the bakery id this owner manages, or null if they have none yet. */
+/** Reads the bakery id this owner manages, or null if they have none yet.
+ *  Races against a 10-second timeout so the UI never hangs on DB issues. */
 export async function getOwnerBakeryId(uid) {
-  const snap = await get(ref(db, `users/${uid}/bakeryId`))
+  const fetchPromise = get(ref(db, `users/${uid}/bakeryId`))
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('db-timeout')), 10_000),
+  )
+  const snap = await Promise.race([fetchPromise, timeoutPromise])
   return snap.exists() ? snap.val() : null
 }
 

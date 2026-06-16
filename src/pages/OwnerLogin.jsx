@@ -21,7 +21,9 @@ export default function OwnerLogin() {
 
   // If we arrived back from the email link, finish the sign-in.
   useEffect(() => {
-    if (!isSignInWithEmailLink(auth, window.location.href)) return
+    let isLink = false
+    try { isLink = isSignInWithEmailLink(auth, window.location.href) } catch (_) {}
+    if (!isLink) return
     setCompleting(true)
     let saved = window.localStorage.getItem(EMAIL_KEY)
     if (!saved) {

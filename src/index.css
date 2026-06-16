@@ -1035,3 +1035,12 @@ body {
   flex-direction: column;
   gap: 0.5rem;
 }
+
+/* inline code used in error messages */
+.served-message code {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+  background: var(--gray-light);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}

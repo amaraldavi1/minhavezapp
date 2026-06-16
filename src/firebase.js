@@ -12,6 +12,13 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
+// Detect missing config early so we can show a helpful error
+export const firebaseConfigured =
+  Boolean(firebaseConfig.apiKey) &&
+  !String(firebaseConfig.apiKey).startsWith('your_') &&
+  Boolean(firebaseConfig.databaseURL) &&
+  !String(firebaseConfig.databaseURL).includes('your_project')
+
 const app = initializeApp(firebaseConfig)
 export const db = getDatabase(app)
 export const auth = getAuth(app)
