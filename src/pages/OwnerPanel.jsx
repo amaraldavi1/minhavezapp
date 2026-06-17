@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { ref, onValue } from 'firebase/database'
 import { signOut } from 'firebase/auth'
 import { QRCodeSVG } from 'qrcode.react'
+import { Navigate } from 'react-router-dom'
 import { db, auth } from '../firebase'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
@@ -16,19 +17,23 @@ import {
   resetQueue as resetQueueOp,
   setMenuUrl as setMenuUrlOp,
 } from '../lib/queue'
+import { uploadLogo, removeLogo } from '../lib/logo'
 
 export default function OwnerPanel() {
   const { user } = useAuth()
-  const { isSuper } = useSuperadmin()
+  const { checking: superChecking, isSuper } = useSuperadmin()
   const navigate = useNavigate()
-  const [bakeryId, setBakeryId] = useState(undefined) // undefined=loading, null=none
+  const [bakeryId, setBakeryId] = useState(undefined)
   const [queue, setQueue] = useState(null)
   const [busy, setBusy] = useState(false)
   const [showShare, setShowShare] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [menuInput, setMenuInput] = useState('')
+  const [showLogo, setShowLogo] = useState(false)
+  const [logoFile, setLogoFile] = useState(null)
+  const [logoPreview, setLogoPreview] = useState(null)
+  const [logoUploading, setLogoUploading] = useState(false)
 
-  // Resolve which bakery this owner manages.
   useEffect(() => {
     if (!user) return
     let active = true
@@ -38,7 +43,6 @@ export default function OwnerPanel() {
     return () => { active = false }
   }, [user])
 
-  // Live-subscribe to this bakery's queue.
   useEffect(() => {
     if (!bakeryId) return
     const unsub = onValue(ref(db, `bakeries/${bakeryId}`), (snap) => {
@@ -57,6 +61,15 @@ export default function OwnerPanel() {
   }
 
   if (bakeryId === null) {
+    if (superChecking) {
+      return (
+        <div className="loading">
+          <span className="loading-icon">⏳</span>
+          <p>Verificando permissões...</p>
+        </div>
+      )
+    }
+    if (isSuper) return <Navigate to="/admin" replace />
     return <Onboarding user={user} onCreated={(id) => setBakeryId(id)} />
   }
 
@@ -76,6 +89,7 @@ export default function OwnerPanel() {
   const hasNext = totalWaiting > 0
   const bakeryName = queue.info?.name ?? 'Minha Padaria'
   const menuUrl = queue.info?.menuUrl ?? ''
+  const logoUrl = queue.info?.logoUrl ?? null
   const clientLink = `${window.location.origin}/fila/${bakeryId}`
 
   function openMenuModal() {
@@ -89,6 +103,46 @@ export default function OwnerPanel() {
       setShowMenu(false)
     } catch (e) {
       alert(`Erro ao salvar o cardápio (${e?.code ?? e?.message}).`)
+    }
+  }
+
+  function openLogoModal() {
+    setLogoFile(null)
+    setLogoPreview(null)
+    setShowLogo(true)
+  }
+
+  function handleLogoFileChange(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    setLogoFile(file)
+    const reader = new FileReader()
+    reader.onload = (ev) => setLogoPreview(ev.target.result)
+    reader.readAsDataURL(file)
+  }
+
+  async function handleLogoUpload() {
+    if (!logoFile || logoUploading) return
+    setLogoUploading(true)
+    try {
+      await uploadLogo(bakeryId, logoFile)
+      setShowLogo(false)
+      setLogoFile(null)
+      setLogoPreview(null)
+    } catch (e) {
+      alert(`Erro ao enviar a logomarca (${e?.code ?? e?.message}).`)
+    } finally {
+      setLogoUploading(false)
+    }
+  }
+
+  async function handleLogoRemove() {
+    if (!confirm('Remover a logomarca do estabelecimento?')) return
+    try {
+      await removeLogo(bakeryId, logoUrl)
+      setShowLogo(false)
+    } catch (e) {
+      alert(`Erro ao remover a logomarca (${e?.code ?? e?.message}).`)
     }
   }
 
@@ -129,8 +183,13 @@ export default function OwnerPanel() {
         {/* Header */}
         <div className="att-header">
           <div className="att-header-left">
-            <h1 className="att-title">{bakeryName}</h1>
-            <span className="att-badge">{totalWaiting} aguardando</span>
+            {logoUrl && (
+              <img src={logoUrl} alt="Logo" className="att-logo" onClick={openLogoModal} title="Editar logomarca" />
+            )}
+            <div>
+              <h1 className="att-title">{bakeryName}</h1>
+              <span className="att-badge">{totalWaiting} aguardando</span>
+            </div>
           </div>
           <div className="att-header-actions">
             {isSuper && (
@@ -144,13 +203,18 @@ export default function OwnerPanel() {
           </div>
         </div>
 
-        {/* Share QR + menu link */}
+        {/* Share QR + logo + menu link */}
         <button className="att-share-btn" onClick={() => setShowShare(true)}>
           📲 Mostrar QR Code para os clientes
         </button>
-        <button className="att-menu-btn" onClick={openMenuModal}>
-          {menuUrl ? '🔗 Editar link do cardápio' : '➕ Adicionar link do cardápio'}
-        </button>
+        <div className="att-tool-row">
+          <button className="att-tool-btn" onClick={openLogoModal}>
+            {logoUrl ? '🖼️ Editar logomarca' : '🖼️ Adicionar logomarca'}
+          </button>
+          <button className="att-tool-btn" onClick={openMenuModal}>
+            {menuUrl ? '🔗 Editar cardápio' : '➕ Adicionar cardápio'}
+          </button>
+        </div>
 
         {/* Currently serving */}
         <div className={`att-serving-card ${isServing ? 'att-serving-active' : ''}`}>
@@ -237,6 +301,59 @@ export default function OwnerPanel() {
               </button>
               <button className="btn btn-ghost" onClick={() => setShowShare(false)}>
                 Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Logo overlay */}
+      {showLogo && (
+        <div className="share-overlay" onClick={() => setShowLogo(false)}>
+          <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="share-title">Logomarca do estabelecimento</h2>
+            <p className="share-sub">
+              Aparece na tela do cliente ao entrar na fila.
+              Formatos aceitos: JPG, PNG, WebP (máx. 2 MB).
+            </p>
+
+            {(logoPreview || logoUrl) && (
+              <div className="logo-preview-wrap">
+                <img
+                  src={logoPreview ?? logoUrl}
+                  alt="Preview da logo"
+                  className="logo-preview-img"
+                />
+              </div>
+            )}
+
+            <label className="logo-file-label">
+              {logoPreview ? '🔄 Trocar imagem' : logoUrl ? '🔄 Substituir logomarca' : '📁 Escolher imagem'}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleLogoFileChange}
+                style={{ display: 'none' }}
+              />
+            </label>
+
+            <div className="share-actions">
+              {logoFile && (
+                <button
+                  className="btn btn-primary w-full"
+                  onClick={handleLogoUpload}
+                  disabled={logoUploading}
+                >
+                  {logoUploading ? '⏳ Enviando...' : '☁️ Salvar logomarca'}
+                </button>
+              )}
+              {logoUrl && !logoFile && (
+                <button className="btn btn-danger-ghost" onClick={handleLogoRemove}>
+                  🗑️ Remover logomarca
+                </button>
+              )}
+              <button className="btn btn-ghost" onClick={() => setShowLogo(false)}>
+                Cancelar
               </button>
             </div>
           </div>

@@ -179,6 +179,7 @@ export default function ClientView() {
   const currentlyServing = queue.state?.currentlyServing ?? null
   const bakeryName = queue.info?.name ?? 'Padaria'
   const menuUrl = queue.info?.menuUrl ?? null
+  const logoUrl = queue.info?.logoUrl ?? null
   const isMyTurn = myTicket !== null && currentlyServing === myTicket
   const myIndex = sortedWaiting.findIndex((t) => t.number === myTicket)
   const isWaiting = myIndex !== -1
@@ -206,7 +207,10 @@ export default function ClientView() {
     return (
       <div className="view">
         <div className="page-header">
-          <span className="page-icon">🍞</span>
+          {logoUrl
+            ? <img src={logoUrl} alt={bakeryName} className="bakery-logo" />
+            : <span className="page-icon">🍞</span>
+          }
           <h1 className="page-title">{bakeryName}</h1>
         </div>
 
@@ -262,7 +266,10 @@ export default function ClientView() {
   return (
     <div className="view join-view">
       <div className="page-header">
-        <span className="page-icon">🍞</span>
+        {logoUrl
+          ? <img src={logoUrl} alt={bakeryName} className="bakery-logo" />
+          : <span className="page-icon">🍞</span>
+        }
         <h1 className="page-title">{bakeryName}</h1>
         <p className="page-subtitle">
           {sortedWaiting.length === 0

@@ -21,6 +21,7 @@
           "ownerUid": { ".validate": "newData.isString()" },
           "createdAt": { ".validate": "newData.isNumber()" },
           "menuUrl": { ".validate": "newData.isString() && newData.val().length <= 500" },
+          "logoUrl": { ".validate": "newData.isString() && newData.val().length <= 2000" },
           "$other": { ".validate": false }
         },
 
