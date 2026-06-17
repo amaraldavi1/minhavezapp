@@ -40,7 +40,8 @@
           ".write": "auth != null",
           "$ticket": {
             "number": { ".validate": "newData.isNumber()" },
-            "joinedAt": { ".validate": "newData.isNumber()" }
+            "joinedAt": { ".validate": "newData.isNumber()" },
+            "name": { ".validate": "newData.isString() && newData.val().length <= 80" }
           }
         }
       }

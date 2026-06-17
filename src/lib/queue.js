@@ -56,17 +56,16 @@ export async function createBakery(uid, email, name) {
  *  The transaction targets ONLY state/nextTicketNumber — never the whole
  *  state node — so it doesn't touch currentlyServing, which the security
  *  rules reserve for the owner. */
-export async function joinQueue(bakeryId) {
+export async function joinQueue(bakeryId, name) {
   const result = await runTransaction(
     ref(db, `bakeries/${bakeryId}/state/nextTicketNumber`),
     (current) => (current ?? 1) + 1,
   )
   // The committed value is the next ticket; ours is one below it.
   const ticketNumber = result.snapshot.val() - 1
-  await update(ref(db, `bakeries/${bakeryId}/waiting/${padTicket(ticketNumber)}`), {
-    number: ticketNumber,
-    joinedAt: Date.now(),
-  })
+  const entry = { number: ticketNumber, joinedAt: Date.now() }
+  if (name && name.trim()) entry.name = name.trim()
+  await update(ref(db, `bakeries/${bakeryId}/waiting/${padTicket(ticketNumber)}`), entry)
   return ticketNumber
 }
 

@@ -34,7 +34,9 @@ export default function OwnerPanel() {
   const [logoFile, setLogoFile] = useState(null)
   const [logoPreview, setLogoPreview] = useState(null)
   const [logoUploading, setLogoUploading] = useState(false)
-  const [generatedTicket, setGeneratedTicket] = useState(null)
+  const [showGenerateModal, setShowGenerateModal] = useState(false)
+  const [generateName, setGenerateName] = useState('')
+  const [generatedTicket, setGeneratedTicket] = useState(null) // { number, name }
   const [generating, setGenerating] = useState(false)
 
   useEffect(() => {
@@ -150,12 +152,19 @@ export default function OwnerPanel() {
     }
   }
 
+  function openGenerateModal() {
+    setGenerateName('')
+    setShowGenerateModal(true)
+  }
+
   async function handleGenerateTicket() {
     if (generating) return
     setGenerating(true)
     try {
-      const number = await joinQueue(bakeryId)
-      setGeneratedTicket(number)
+      const number = await joinQueue(bakeryId, generateName)
+      setGeneratedTicket({ number, name: generateName.trim() || null })
+      setShowGenerateModal(false)
+      setGenerateName('')
     } catch (e) {
       alert(`Erro ao gerar senha (${e?.code ?? e?.message}).`)
     } finally {
@@ -234,13 +243,9 @@ export default function OwnerPanel() {
         </div>
 
         {/* Manual ticket generation */}
-        <button
-          className="att-generate-btn"
-          onClick={handleGenerateTicket}
-          disabled={generating}
-        >
+        <button className="att-generate-btn" onClick={openGenerateModal}>
           <span>🎫</span>
-          <span>{generating ? 'Gerando...' : 'Gerar senha para cliente sem celular'}</span>
+          <span>Gerar senha para cliente sem celular</span>
         </button>
 
         {/* Currently serving */}
@@ -277,6 +282,7 @@ export default function OwnerPanel() {
                 >
                   <span className="att-queue-pos">{index + 1}º</span>
                   <span className="att-queue-num">#{ticket.number}</span>
+                  {ticket.name && <span className="att-queue-name">{ticket.name}</span>}
                   {index === 0 && <span className="att-next-tag">próximo</span>}
                 </li>
               ))}
@@ -343,22 +349,61 @@ export default function OwnerPanel() {
         </div>
       )}
 
-      {/* Generated ticket overlay */}
+      {/* Generate ticket modal — name input */}
+      {showGenerateModal && (
+        <div className="share-overlay" onClick={() => setShowGenerateModal(false)}>
+          <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="share-title">Gerar senha manual</h2>
+            <p className="share-sub">Nome do cliente (opcional)</p>
+            <div className="input-group" style={{ width: '100%', textAlign: 'left', marginTop: '0.75rem' }}>
+              <label htmlFor="gname" className="input-label">Nome</label>
+              <input
+                id="gname"
+                type="text"
+                value={generateName}
+                onChange={(e) => setGenerateName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleGenerateTicket()}
+                placeholder="Ex: Maria Silva"
+                maxLength={80}
+                autoFocus
+                className="input-field input-text"
+              />
+            </div>
+            <div className="share-actions" style={{ marginTop: '1.25rem' }}>
+              <button
+                className="btn btn-primary w-full"
+                onClick={handleGenerateTicket}
+                disabled={generating}
+              >
+                {generating ? '⏳ Gerando...' : '🎫 Gerar senha'}
+              </button>
+              <button className="btn btn-ghost" onClick={() => setShowGenerateModal(false)}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Generated ticket confirmation */}
       {generatedTicket !== null && (
         <div className="share-overlay" onClick={() => setGeneratedTicket(null)}>
           <div className="share-modal" onClick={(e) => e.stopPropagation()}>
             <h2 className="share-title">Senha gerada!</h2>
             <p className="share-sub">Informe este número ao cliente:</p>
             <div className="generated-ticket-number">
-              #{generatedTicket}
+              #{generatedTicket.number}
             </div>
+            {generatedTicket.name && (
+              <p className="generated-ticket-name">{generatedTicket.name}</p>
+            )}
             <p className="share-sub" style={{ marginTop: '0.5rem' }}>
               O cliente já está na fila de espera.
             </p>
             <div className="share-actions" style={{ marginTop: '1.25rem' }}>
               <button
                 className="btn btn-primary w-full"
-                onClick={() => { setGeneratedTicket(null); handleGenerateTicket() }}
+                onClick={() => { setGeneratedTicket(null); openGenerateModal() }}
               >
                 🎫 Gerar outra senha
               </button>

@@ -1112,6 +1112,24 @@ body {
   margin: 1rem 0 0.25rem;
 }
 
+.generated-ticket-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 0.25rem;
+}
+
+/* Name label in queue list */
+.att-queue-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gray);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Outline button (client "ver cardápio") */
 .btn-outline {
   background: var(--white);
