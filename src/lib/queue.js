@@ -93,10 +93,12 @@ export function markServed(bakeryId, next) {
   return update(ref(db, `bakeries/${bakeryId}/state`), { currentlyServing: null })
 }
 
-/** Clears the queue for end of day, preserving the bakery's info/ownership. */
+/** Clears the queue for end of day, preserving the bakery's info/ownership.
+ *  Uses explicit paths so each write hits the correct security rule. */
 export function resetQueue(bakeryId) {
   return update(ref(db, `bakeries/${bakeryId}`), {
-    state: { nextTicketNumber: 1, currentlyServing: null },
-    waiting: null,
+    'state/nextTicketNumber': 1,
+    'state/currentlyServing': null,
+    'waiting': null,
   })
 }
