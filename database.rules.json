@@ -4,7 +4,6 @@
       "$bid": {
         ".read": true,
 
-        "//": "Criação: o dono pode gravar o nó inteiro de uma vez na primeira vez (quando ainda não existe). Depois, as regras por-filho controlam cada operação.",
         ".write": "auth != null && !data.exists() && newData.child('info').child('ownerUid').val() === auth.uid",
 
         "info": {
