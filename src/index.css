@@ -1295,3 +1295,103 @@ body {
 .admin-mini-danger:hover {
   background: #FCA5A5;
 }
+
+/* ============================
+   LOGO — owner panel + client
+============================ */
+
+/* Small logo in the owner panel header */
+.att-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.att-logo:hover {
+  opacity: 0.8;
+}
+
+/* Two-column tool button row */
+.att-tool-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.att-tool-btn {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 0.75rem;
+  font-size: 0.88rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--amber-dark);
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.att-tool-btn:hover,
+.att-tool-btn:active {
+  background: var(--amber-lighter);
+  border-color: var(--amber);
+}
+
+/* Bakery logo in client view */
+.bakery-logo {
+  width: 88px;
+  height: 88px;
+  border-radius: 22px;
+  object-fit: cover;
+  border: 3px solid var(--white);
+  box-shadow: var(--shadow-lg);
+  display: block;
+  margin: 0 auto 0.5rem;
+}
+
+/* Logo upload preview */
+.logo-preview-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0 0.5rem;
+}
+
+.logo-preview-img {
+  width: 120px;
+  height: 120px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+/* Styled file-input trigger */
+.logo-file-label {
+  display: block;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  margin: 0.5rem 0;
+  background: var(--gray-light);
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+.logo-file-label:hover {
+  background: var(--amber-lighter);
+  border-color: var(--amber);
+}
