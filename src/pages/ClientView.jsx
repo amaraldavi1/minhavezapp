@@ -33,7 +33,7 @@ function playChime() {
 export default function ClientView() {
   const { bakeryId } = useParams()
   const [authReady, setAuthReady] = useState(false)
-  const [authError, setAuthError] = useState(false)
+  const [authError, setAuthError] = useState(null)
   const [queue, setQueue] = useState(null)
   const [exists, setExists] = useState(undefined) // undefined=loading, false=not found
   const [myTicket, setMyTicket] = useState(() => {
@@ -47,7 +47,10 @@ export default function ClientView() {
   useEffect(() => {
     ensureAnonAuth()
       .then(() => setAuthReady(true))
-      .catch(() => setAuthError(true))
+      .catch((err) => {
+        console.error('Anonymous sign-in failed:', err)
+        setAuthError(err?.code ?? 'auth-error')
+      })
   }, [])
 
   // Subscribe to this bakery's queue.
@@ -113,13 +116,32 @@ export default function ClientView() {
 
   // === ERROR / LOADING STATES ===
   if (authError) {
+    const anonDisabled =
+      authError === 'auth/operation-not-allowed' ||
+      authError === 'auth/admin-restricted-operation' ||
+      authError === 'auth/configuration-not-found'
     return (
       <div className="served-view">
         <span className="served-icon">⚠️</span>
-        <h2 className="served-title">Erro de conexão</h2>
+        <h2 className="served-title">Não foi possível entrar</h2>
         <p className="served-message">
-          Não foi possível conectar. Verifique sua internet e recarregue a página.
+          {anonDisabled ? (
+            <>
+              O login anônimo não está habilitado neste projeto Firebase.
+              Peça ao responsável para ativar em{' '}
+              <strong>Authentication → Sign-in method → Anônimo</strong>.
+            </>
+          ) : (
+            <>
+              Não foi possível conectar. Verifique sua internet e recarregue
+              a página.<br /><br />
+              <code>{authError}</code>
+            </>
+          )}
         </p>
+        <button className="btn btn-ghost" onClick={() => window.location.reload()}>
+          Tentar novamente
+        </button>
       </div>
     )
   }
