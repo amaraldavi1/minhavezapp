@@ -95,7 +95,14 @@ export default function ClientView() {
       setMyTicket(ticketNumber)
       localStorage.setItem(storageKey(bakeryId), String(ticketNumber))
     } catch (err) {
-      alert('Erro ao entrar na fila. Verifique sua conexão e tente novamente.')
+      console.error('joinQueue failed:', err)
+      const isPermission =
+        err?.code === 'PERMISSION_DENIED' || /permission/i.test(err?.message ?? '')
+      alert(
+        isPermission
+          ? 'Permissão negada pelo banco. Publique a versão mais recente das regras de segurança no Firebase.'
+          : `Erro ao entrar na fila (${err?.code ?? err?.message ?? 'desconhecido'}). Tente novamente.`,
+      )
     } finally {
       setJoining(false)
     }
