@@ -7,7 +7,7 @@ import { db, auth } from '../firebase'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { useSuperadmin } from '../auth/useSuperadmin'
-import Onboarding from './Onboarding'
+import { getInviteByEmail, claimInvite as claimInviteOp } from '../lib/invites'
 import {
   getOwnerBakeryId,
   normalizeQueue,
@@ -39,6 +39,9 @@ export default function OwnerPanel() {
   const [generateName, setGenerateName] = useState('')
   const [generatedTicket, setGeneratedTicket] = useState(null) // { number, name }
   const [generating, setGenerating] = useState(false)
+  const [inviteData, setInviteData] = useState(undefined) // undefined=checking, null=none, {bakeryId,bakeryName}
+  const [claiming, setClaiming] = useState(false)
+  const [claimError, setClaimError] = useState('')
 
   useEffect(() => {
     if (!user) return
@@ -48,6 +51,16 @@ export default function OwnerPanel() {
       .catch(() => { if (active) setBakeryId(null) })
     return () => { active = false }
   }, [user])
+
+  useEffect(() => {
+    if (bakeryId !== null || !user || user.isAnonymous || !user.email) {
+      if (bakeryId === null && (!user || user.isAnonymous || !user.email)) setInviteData(null)
+      return
+    }
+    getInviteByEmail(user.email)
+      .then((inv) => setInviteData(inv ? { bakeryId: inv.bakeryId, bakeryName: inv.bakeryName } : null))
+      .catch(() => setInviteData(null))
+  }, [bakeryId, user])
 
   useEffect(() => {
     if (!bakeryId) return
@@ -76,7 +89,77 @@ export default function OwnerPanel() {
       )
     }
     if (isSuper) return <Navigate to="/admin" replace />
-    return <Onboarding user={user} onCreated={(id) => setBakeryId(id)} />
+
+    if (inviteData === undefined) {
+      return (
+        <div className="loading">
+          <span className="loading-icon">⏳</span>
+          <p>Verificando convite...</p>
+        </div>
+      )
+    }
+
+    async function handleClaimInvite() {
+      if (claiming || !inviteData) return
+      setClaiming(true)
+      setClaimError('')
+      try {
+        await claimInviteOp(user.uid, user.email, inviteData.bakeryId)
+        setBakeryId(inviteData.bakeryId)
+      } catch (e) {
+        const isPermission = e?.code === 'PERMISSION_DENIED' || /permission/i.test(e?.message ?? '')
+        setClaimError(
+          isPermission
+            ? 'Permissão negada. Contate o administrador do sistema.'
+            : `Erro ao confirmar acesso (${e?.code ?? e?.message ?? 'desconhecido'}).`,
+        )
+        setClaiming(false)
+      }
+    }
+
+    function handleLogoutRestricted() {
+      signOut(auth).then(() => navigate('/painel/login', { replace: true }))
+    }
+
+    if (inviteData) {
+      return (
+        <div className="login-view">
+          <div className="login-card">
+            <span className="login-icon">🎉</span>
+            <h1 className="login-title">Bem-vindo!</h1>
+            <p className="login-subtitle">
+              Você foi convidado para gerenciar a padaria<br />
+              <strong>{inviteData.bakeryName}</strong>
+            </p>
+            {claimError && <span className="error-msg" style={{ marginBottom: '0.5rem' }}>❌ {claimError}</span>}
+            <button
+              className="btn btn-primary w-full"
+              onClick={handleClaimInvite}
+              disabled={claiming}
+            >
+              {claiming ? '⏳ Configurando...' : '✅ Confirmar acesso'}
+            </button>
+            <button className="btn btn-ghost" onClick={handleLogoutRestricted}>
+              Sair
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="served-view">
+        <span className="served-icon">🔒</span>
+        <h2 className="served-title">Acesso restrito</h2>
+        <p className="served-message">
+          Este painel é exclusivo dos responsáveis pelas padarias cadastradas.
+          Entre em contato com o administrador do sistema para solicitar acesso.
+        </p>
+        <button className="btn btn-ghost" onClick={handleLogoutRestricted}>
+          ← Sair
+        </button>
+      </div>
+    )
   }
 
   if (!queue) {

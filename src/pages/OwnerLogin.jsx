@@ -27,6 +27,10 @@ export default function OwnerLogin() {
     setCompleting(true)
     let saved = window.localStorage.getItem(EMAIL_KEY)
     if (!saved) {
+      const params = new URLSearchParams(window.location.search)
+      saved = params.get('email') || null
+    }
+    if (!saved) {
       saved = window.prompt('Confirme seu e-mail para concluir o login:')
     }
     if (!saved) {

@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
 import { auth } from '../firebase'
 import {
   subscribeSystem,
+  createBakeryAdmin,
+  sendOwnerInvite,
   renameBakery,
   deleteBakery,
   deleteAdmin,
@@ -26,12 +28,35 @@ export default function AdminDashboard() {
   const [error, setError] = useState('')
   const [tab, setTab] = useState('bakeries')
 
+  // New bakery modal
+  const [showNew, setShowNew] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [newEmail, setNewEmail] = useState('')
+  const [newBusy, setNewBusy] = useState(false)
+  const [newError, setNewError] = useState('')
+
+  // Rename modal
+  const [renameModal, setRenameModal] = useState(null) // { id, currentName }
+  const [renameValue, setRenameValue] = useState('')
+  const [renameBusy, setRenameBusy] = useState(false)
+  const [renameError, setRenameError] = useState('')
+
+  // Per-bakery invite send state
+  const [inviteSent, setInviteSent] = useState({}) // { [bakeryId]: 'sending' | 'sent' }
+  const inviteTimers = useRef({})
+
   useEffect(() => {
     const unsub = subscribeSystem(
       (system) => { setData(system); setError('') },
       (e) => setError(e?.code ?? 'erro ao carregar'),
     )
     return () => unsub()
+  }, [])
+
+  // Clean up invite timers on unmount
+  useEffect(() => {
+    const timers = inviteTimers.current
+    return () => Object.values(timers).forEach(clearTimeout)
   }, [])
 
   if (error) {
@@ -64,7 +89,11 @@ export default function AdminDashboard() {
     id,
     name: b?.info?.name ?? '(sem nome)',
     ownerUid: b?.info?.ownerUid ?? null,
-    ownerEmail: (b?.info?.ownerUid && data.users?.[b.info.ownerUid]?.email) || '—',
+    ownerEmail: b?.info?.ownerUid === 'unclaimed'
+      ? (b?.info?.ownerEmail ?? '—')
+      : (b?.info?.ownerUid && data.users?.[b.info.ownerUid]?.email) || '—',
+    ownerEmailRaw: b?.info?.ownerEmail ?? null,
+    unclaimed: b?.info?.ownerUid === 'unclaimed',
     createdAt: b?.info?.createdAt,
     serving: b?.state?.currentlyServing ?? null,
     waiting: Object.keys(b?.waiting ?? {}).length,
@@ -78,18 +107,62 @@ export default function AdminDashboard() {
   })).sort((a, b) => (a.email > b.email ? 1 : -1))
 
   const totalWaiting = bakeries.reduce((sum, b) => sum + b.waiting, 0)
+  const unclaimedCount = bakeries.filter((b) => b.unclaimed).length
 
-  async function handleRename(b) {
-    const name = window.prompt('Novo nome da padaria:', b.name)
-    if (name === null) return
-    if (!name.trim()) { alert('O nome não pode ficar vazio.'); return }
-    try { await renameBakery(b.id, name) }
-    catch (e) { alert(`Erro ao renomear (${e?.code ?? e?.message}).`) }
+  async function handleCreateBakery() {
+    if (!newName.trim() || !newEmail.trim() || newBusy) return
+    setNewBusy(true)
+    setNewError('')
+    try {
+      await createBakeryAdmin(newName, newEmail)
+      setShowNew(false)
+      setNewName('')
+      setNewEmail('')
+    } catch (e) {
+      setNewError(e?.message ?? `Erro ao criar padaria (${e?.code ?? 'desconhecido'}).`)
+    } finally {
+      setNewBusy(false)
+    }
+  }
+
+  async function handleSendInvite(b) {
+    if (inviteSent[b.id] === 'sending') return
+    setInviteSent((prev) => ({ ...prev, [b.id]: 'sending' }))
+    try {
+      await sendOwnerInvite(b.ownerEmail, window.location.origin)
+      setInviteSent((prev) => ({ ...prev, [b.id]: 'sent' }))
+      inviteTimers.current[b.id] = setTimeout(() => {
+        setInviteSent((prev) => { const n = { ...prev }; delete n[b.id]; return n })
+      }, 4000)
+    } catch (e) {
+      setInviteSent((prev) => { const n = { ...prev }; delete n[b.id]; return n })
+      alert(`Erro ao enviar convite (${e?.code ?? e?.message}).`)
+    }
+  }
+
+  function openRenameModal(b) {
+    setRenameModal({ id: b.id })
+    setRenameValue(b.name)
+    setRenameError('')
+    setRenameBusy(false)
+  }
+
+  async function handleRename() {
+    if (!renameValue.trim() || renameBusy || !renameModal) return
+    setRenameBusy(true)
+    setRenameError('')
+    try {
+      await renameBakery(renameModal.id, renameValue)
+      setRenameModal(null)
+    } catch (e) {
+      setRenameError(e?.message ?? `Erro ao renomear (${e?.code ?? 'desconhecido'}).`)
+      setRenameBusy(false)
+    }
   }
 
   async function handleDeleteBakery(b) {
-    if (!confirm(`Excluir a padaria "${b.name}"?\n\nA fila será apagada e o dono poderá criar uma nova.`)) return
-    try { await deleteBakery(b.id, b.ownerUid) }
+    if (!confirm(`Excluir a padaria "${b.name}"?\n\nA fila será apagada e o dono perderá o acesso.`)) return
+    try { await deleteBakery(b.id, b.ownerUid, b.ownerEmailRaw) }
     catch (e) { alert(`Erro ao excluir (${e?.code ?? e?.message}).`) }
   }
 
@@ -122,7 +195,7 @@ export default function AdminDashboard() {
         </div>
         <div className="admin-stat">
           <span className="admin-stat-value">{admins.length}</span>
-          <span className="admin-stat-label">administradores</span>
+          <span className="admin-stat-label">admins ativos</span>
         </div>
         <div className="admin-stat">
           <span className="admin-stat-value">{totalWaiting}</span>
@@ -136,7 +209,7 @@ export default function AdminDashboard() {
           className={`admin-tab ${tab === 'bakeries' ? 'admin-tab-active' : ''}`}
           onClick={() => setTab('bakeries')}
         >
-          🏪 Padarias
+          🏪 Padarias {unclaimedCount > 0 && <span className="admin-tab-badge">{unclaimedCount}</span>}
         </button>
         <button
           className={`admin-tab ${tab === 'admins' ? 'admin-tab-active' : ''}`}
@@ -149,24 +222,51 @@ export default function AdminDashboard() {
       {/* Bakeries */}
       {tab === 'bakeries' && (
         <div className="admin-list">
+          <button className="admin-new-btn" onClick={() => { setNewName(''); setNewEmail(''); setNewError(''); setShowNew(true) }}>
+            ＋ Nova padaria
+          </button>
           {bakeries.length === 0 ? (
             <div className="admin-empty">Nenhuma padaria cadastrada.</div>
           ) : (
             bakeries.map((b) => (
-              <div key={b.id} className="admin-card">
+              <div key={b.id} className={`admin-card ${b.unclaimed ? 'admin-card-unclaimed' : ''}`}>
                 <div className="admin-card-main">
                   <span className="admin-card-name">{b.name}</span>
                   <span className="admin-card-meta">{b.ownerEmail}</span>
                   <div className="admin-card-tags">
+                    {b.unclaimed
+                      ? <span className="admin-tag admin-tag-orange">⏳ Aguardando dono</span>
+                      : <span className="admin-tag admin-tag-green">✅ Ativo</span>
+                    }
                     <span className="admin-tag">🎫 {b.waiting} na fila</span>
                     {b.serving != null && <span className="admin-tag admin-tag-green">🔔 #{b.serving}</span>}
                     <span className="admin-tag admin-tag-muted">desde {fmtDate(b.createdAt)}</span>
                   </div>
                 </div>
                 <div className="admin-card-actions">
-                  <a className="admin-mini-btn" href={`/fila/${b.id}`} target="_blank" rel="noopener noreferrer">Abrir</a>
-                  <button className="admin-mini-btn" onClick={() => handleRename(b)}>Renomear</button>
-                  <button className="admin-mini-btn admin-mini-danger" onClick={() => handleDeleteBakery(b)}>Excluir</button>
+                  {b.unclaimed ? (
+                    <button
+                      className="admin-mini-btn admin-mini-invite"
+                      onClick={() => handleSendInvite(b)}
+                      disabled={inviteSent[b.id] === 'sending'}
+                    >
+                      {inviteSent[b.id] === 'sent'
+                        ? '✅ Enviado!'
+                        : inviteSent[b.id] === 'sending'
+                        ? '⏳...'
+                        : '✉️ Enviar convite'}
+                    </button>
+                  ) : (
+                    <a className="admin-mini-btn" href={`/fila/${b.id}`} target="_blank" rel="noopener noreferrer">
+                      Abrir
+                    </a>
+                  )}
+                  <button className="admin-mini-btn" onClick={() => openRenameModal(b)}>
+                    Renomear
+                  </button>
+                  <button className="admin-mini-btn admin-mini-danger" onClick={() => handleDeleteBakery(b)}>
+                    Excluir
+                  </button>
                 </div>
               </div>
             ))
@@ -178,7 +278,7 @@ export default function AdminDashboard() {
       {tab === 'admins' && (
         <div className="admin-list">
           {admins.length === 0 ? (
-            <div className="admin-empty">Nenhum administrador cadastrado.</div>
+            <div className="admin-empty">Nenhum administrador ativo.</div>
           ) : (
             admins.map((a) => (
               <div key={a.uid} className="admin-card">
@@ -197,6 +297,93 @@ export default function AdminDashboard() {
               </div>
             ))
           )}
+        </div>
+      )}
+
+      {/* New bakery modal */}
+      {showNew && (
+        <div className="share-overlay" onClick={() => !newBusy && setShowNew(false)}>
+          <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="share-title">Nova padaria</h2>
+            <p className="share-sub">
+              A padaria ficará aguardando até o responsável confirmar o acesso pelo link enviado.
+            </p>
+            <div className="input-group" style={{ width: '100%', textAlign: 'left', marginTop: '0.75rem' }}>
+              <label htmlFor="new-name" className="input-label">Nome da padaria</label>
+              <input
+                id="new-name"
+                type="text"
+                value={newName}
+                onChange={(e) => { setNewName(e.target.value); setNewError('') }}
+                onKeyDown={(e) => e.key === 'Enter' && document.getElementById('new-email').focus()}
+                placeholder="Ex: Padaria Pão Quente"
+                maxLength={60}
+                autoFocus
+                className="input-field input-text"
+              />
+            </div>
+            <div className="input-group" style={{ width: '100%', textAlign: 'left', marginTop: '0.75rem' }}>
+              <label htmlFor="new-email" className="input-label">E-mail do responsável</label>
+              <input
+                id="new-email"
+                type="email"
+                value={newEmail}
+                onChange={(e) => { setNewEmail(e.target.value); setNewError('') }}
+                onKeyDown={(e) => e.key === 'Enter' && handleCreateBakery()}
+                placeholder="dono@padaria.com"
+                autoComplete="off"
+                className="input-field input-text"
+              />
+            </div>
+            {newError && <span className="error-msg" style={{ marginTop: '0.5rem' }}>❌ {newError}</span>}
+            <div className="share-actions" style={{ marginTop: '1.25rem' }}>
+              <button
+                className="btn btn-primary w-full"
+                onClick={handleCreateBakery}
+                disabled={newBusy || !newName.trim() || !newEmail.trim()}
+              >
+                {newBusy ? '⏳ Criando...' : '🏪 Criar padaria'}
+              </button>
+              <button className="btn btn-ghost" onClick={() => setShowNew(false)} disabled={newBusy}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rename modal */}
+      {renameModal && (
+        <div className="share-overlay" onClick={() => !renameBusy && setRenameModal(null)}>
+          <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="share-title">Renomear padaria</h2>
+            <div className="input-group" style={{ width: '100%', textAlign: 'left', marginTop: '0.75rem' }}>
+              <label htmlFor="rename-val" className="input-label">Novo nome</label>
+              <input
+                id="rename-val"
+                type="text"
+                value={renameValue}
+                onChange={(e) => { setRenameValue(e.target.value); setRenameError('') }}
+                onKeyDown={(e) => e.key === 'Enter' && handleRename()}
+                maxLength={60}
+                autoFocus
+                className="input-field input-text"
+              />
+            </div>
+            {renameError && <span className="error-msg" style={{ marginTop: '0.5rem' }}>❌ {renameError}</span>}
+            <div className="share-actions" style={{ marginTop: '1.25rem' }}>
+              <button
+                className="btn btn-primary w-full"
+                onClick={handleRename}
+                disabled={renameBusy || !renameValue.trim()}
+              >
+                {renameBusy ? '⏳ Salvando...' : '💾 Salvar'}
+              </button>
+              <button className="btn btn-ghost" onClick={() => setRenameModal(null)} disabled={renameBusy}>
+                Cancelar
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

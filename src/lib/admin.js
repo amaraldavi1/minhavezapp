@@ -1,5 +1,7 @@
-import { ref, get, onValue, update } from 'firebase/database'
-import { db } from '../firebase'
+import { ref, get, set, push, onValue, update } from 'firebase/database'
+import { sendSignInLinkToEmail } from 'firebase/auth'
+import { db, auth } from '../firebase'
+import { encodeEmail } from './invites'
 
 /** Checks whether a uid is registered as a system superadmin. */
 export async function checkSuperadmin(uid) {
@@ -39,15 +41,51 @@ export function subscribeSystem(callback, onError) {
   return () => { u1(); u2() }
 }
 
+/** Creates an unclaimed bakery and a matching invite for the owner email. */
+export async function createBakeryAdmin(name, ownerEmail) {
+  const email = ownerEmail.trim().toLowerCase()
+  const bakeryRef = push(ref(db, 'bakeries'))
+  const bakeryId = bakeryRef.key
+  await set(bakeryRef, {
+    info: {
+      name: name.trim(),
+      ownerUid: 'unclaimed',
+      ownerEmail: email,
+      createdAt: Date.now(),
+    },
+  })
+  await set(ref(db, `invites/${encodeEmail(email)}`), {
+    bakeryId,
+    bakeryName: name.trim(),
+    ownerEmail: email,
+    createdAt: Date.now(),
+  })
+  return bakeryId
+}
+
+/** Sends a magic-link sign-in email to the prospective bakery owner. */
+export function sendOwnerInvite(email, origin) {
+  return sendSignInLinkToEmail(auth, email, {
+    url: `${origin}/painel/login?email=${encodeURIComponent(email)}`,
+    handleCodeInApp: true,
+  })
+}
+
 /** Renames a bakery (superadmin override). */
 export function renameBakery(bakeryId, name) {
   return update(ref(db, `bakeries/${bakeryId}/info`), { name: name.trim() })
 }
 
-/** Deletes a bakery and unlinks it from its owner (owner keeps their account). */
-export function deleteBakery(bakeryId, ownerUid) {
+/** Deletes a bakery and unlinks it from its owner.
+ *  Also removes the invite if the bakery was unclaimed. */
+export function deleteBakery(bakeryId, ownerUid, ownerEmail) {
   const updates = { [`bakeries/${bakeryId}`]: null }
-  if (ownerUid) updates[`users/${ownerUid}/bakeryId`] = null
+  if (ownerUid && ownerUid !== 'unclaimed') {
+    updates[`users/${ownerUid}/bakeryId`] = null
+  }
+  if (ownerEmail) {
+    updates[`invites/${encodeEmail(ownerEmail)}`] = null
+  }
   return update(ref(db), updates)
 }
 

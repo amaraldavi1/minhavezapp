@@ -1352,6 +1352,62 @@ body {
   background: #FCA5A5;
 }
 
+.admin-mini-invite {
+  background: #EFF6FF;
+  color: #1D4ED8;
+}
+.admin-mini-invite:hover {
+  background: #DBEAFE;
+}
+.admin-mini-invite:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.admin-tag-orange {
+  background: #FEF3C7;
+  color: #B45309;
+}
+
+.admin-new-btn {
+  width: 100%;
+  background: var(--amber);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.admin-new-btn:hover {
+  background: var(--amber-dark);
+}
+
+.admin-card-unclaimed {
+  border-left: 3px solid var(--amber);
+}
+
+.admin-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--amber);
+  color: var(--white);
+  font-size: 0.7rem;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 100px;
+  padding: 0 4px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
 /* ============================
    LOGO — owner panel + client
 ============================ */

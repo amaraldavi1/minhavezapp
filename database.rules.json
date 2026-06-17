@@ -16,13 +16,14 @@
         ".write": "auth != null && ((!data.exists() && newData.child('info').child('ownerUid').val() === auth.uid) || root.child('superadmins').child(auth.uid).exists())",
 
         "info": {
-          ".write": "auth != null && ((newData.child('ownerUid').val() === auth.uid && (!data.exists() || data.child('ownerUid').val() === auth.uid)) || root.child('superadmins').child(auth.uid).exists())",
-          "name":      { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60" },
-          "ownerUid":  { ".validate": "newData.isString()" },
-          "createdAt": { ".validate": "newData.isNumber()" },
-          "menuUrl":   { ".validate": "newData.isString() && newData.val().length <= 500 && newData.val().matches(/^https?:\\/\\/.+/)" },
-          "logoUrl":   { ".validate": "newData.isString() && newData.val().length <= 2000" },
-          "$other":    { ".validate": false }
+          ".write": "auth != null && ((newData.child('ownerUid').val() === auth.uid && (!data.exists() || data.child('ownerUid').val() === auth.uid || (data.child('ownerUid').val() === 'unclaimed' && data.child('ownerEmail').val() === auth.token.email))) || root.child('superadmins').child(auth.uid).exists())",
+          "name":       { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60" },
+          "ownerUid":   { ".validate": "newData.isString()" },
+          "ownerEmail": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)" },
+          "createdAt":  { ".validate": "newData.isNumber()" },
+          "menuUrl":    { ".validate": "newData.isString() && newData.val().length <= 500 && newData.val().matches(/^https?:\\/\\/.+/)" },
+          "logoUrl":    { ".validate": "newData.isString() && newData.val().length <= 2000" },
+          "$other":     { ".validate": false }
         },
 
         "state": {
@@ -58,6 +59,14 @@
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || root.child('superadmins').child(auth.uid).exists())",
         ".write": "auth != null && (auth.uid === $uid || root.child('superadmins').child(auth.uid).exists())"
+      }
+    },
+
+    "invites": {
+      ".read": "auth != null && root.child('superadmins').child(auth.uid).exists()",
+      "$encodedEmail": {
+        ".read": "auth != null && auth.token.email != null",
+        ".write": "auth != null && (root.child('superadmins').child(auth.uid).exists() || (!newData.exists() && auth.token.email != null))"
       }
     }
   }
