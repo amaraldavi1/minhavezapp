@@ -1395,3 +1395,197 @@ body {
   background: var(--amber-lighter);
   border-color: var(--amber);
 }
+
+/* ============================
+   MONITOR VIEW (display board)
+============================ */
+.monitor-view {
+  min-height: 100dvh;
+  background: #0F0C08;
+  color: #FEFCE8;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+}
+
+.monitor-loading-state,
+.monitor-error-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: #78716C;
+}
+
+.monitor-loading-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--amber);
+  animation: monitor-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes monitor-pulse {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* Header */
+.monitor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.monitor-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.monitor-logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.monitor-bakery-name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #FEF3C7;
+  letter-spacing: -0.02em;
+}
+
+.monitor-clock {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #D97706;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Main — currently serving */
+.monitor-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 2rem;
+}
+
+.monitor-serving-label {
+  font-size: clamp(0.85rem, 2vw, 1.1rem);
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #D97706;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.monitor-serving-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245, 158, 11, 0.08);
+  border: 2px solid rgba(245, 158, 11, 0.25);
+  border-radius: 32px;
+  padding: 1.5rem 4rem;
+  min-width: min(540px, 85vw);
+  transition: background 0.4s ease, border-color 0.4s ease;
+}
+
+.monitor-flash {
+  background: rgba(245, 158, 11, 0.22) !important;
+  border-color: rgba(245, 158, 11, 0.75) !important;
+  animation: monitor-number-flash 1.8s ease-out;
+}
+
+@keyframes monitor-number-flash {
+  0%   { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+  15%  { box-shadow: 0 0 60px 20px rgba(245, 158, 11, 0.45); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+.monitor-serving-number {
+  font-size: clamp(7rem, 22vw, 18rem);
+  font-weight: 900;
+  color: #FCD34D;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  text-shadow:
+    0 0 60px rgba(252, 211, 77, 0.4),
+    0 4px 24px rgba(0, 0, 0, 0.6);
+}
+
+.monitor-serving-idle {
+  font-size: clamp(5rem, 16vw, 12rem);
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.15);
+  line-height: 1;
+}
+
+.monitor-idle-hint {
+  font-size: clamp(0.85rem, 1.8vw, 1rem);
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* Footer — queue */
+.monitor-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1.25rem 2rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.monitor-footer-label {
+  font-size: clamp(0.65rem, 1.5vw, 0.8rem);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+}
+
+.monitor-next-row {
+  display: flex;
+  gap: 0.875rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.monitor-next-empty {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.monitor-next-ticket {
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.4rem 0.9rem;
+  letter-spacing: -0.02em;
+  min-width: 3.5rem;
+  text-align: center;
+  transition: color 0.3s, background 0.3s;
+}
+
+.monitor-next-first {
+  color: #FEF3C7;
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.35);
+}

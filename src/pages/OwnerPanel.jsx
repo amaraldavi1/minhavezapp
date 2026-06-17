@@ -91,6 +91,7 @@ export default function OwnerPanel() {
   const menuUrl = queue.info?.menuUrl ?? ''
   const logoUrl = queue.info?.logoUrl ?? null
   const clientLink = `${window.location.origin}/fila/${bakeryId}`
+  const monitorLink = `${window.location.origin}/monitor/${bakeryId}`
 
   function openMenuModal() {
     setMenuInput(menuUrl)
@@ -297,8 +298,17 @@ export default function OwnerPanel() {
             <code className="share-link">{clientLink}</code>
             <div className="share-actions">
               <button className="btn btn-primary w-full" onClick={copyLink}>
-                📋 Copiar link
+                📋 Copiar link da fila
               </button>
+              <a
+                className="btn btn-outline w-full"
+                href={monitorLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none' }}
+              >
+                📺 Abrir monitor (balcão)
+              </a>
               <button className="btn btn-ghost" onClick={() => setShowShare(false)}>
                 Fechar
               </button>
