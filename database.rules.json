@@ -4,11 +4,15 @@
       "$bid": {
         ".read": true,
 
+        "//": "Criação: o dono pode gravar o nó inteiro de uma vez na primeira vez (quando ainda não existe). Depois, as regras por-filho controlam cada operação.",
+        ".write": "auth != null && !data.exists() && newData.child('info').child('ownerUid').val() === auth.uid",
+
         "info": {
           ".write": "auth != null && newData.child('ownerUid').val() === auth.uid && (!data.exists() || data.child('ownerUid').val() === auth.uid)",
           "name": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60" },
           "ownerUid": { ".validate": "newData.isString()" },
-          "createdAt": { ".validate": "newData.isNumber()" }
+          "createdAt": { ".validate": "newData.isNumber()" },
+          "$other": { ".validate": false }
         },
 
         "state": {

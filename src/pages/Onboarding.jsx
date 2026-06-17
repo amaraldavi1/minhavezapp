@@ -15,7 +15,15 @@ export default function Onboarding({ user, onCreated }) {
       const bakeryId = await createBakery(user.uid, user.email, name)
       onCreated(bakeryId)
     } catch (err) {
-      setError('Não foi possível criar a padaria. Tente novamente.')
+      console.error('createBakery failed:', err)
+      const isPermission =
+        err?.code === 'PERMISSION_DENIED' ||
+        /permission/i.test(err?.message ?? '')
+      setError(
+        isPermission
+          ? 'Permissão negada pelo banco. Publique as regras de segurança (database.rules.json) no Firebase.'
+          : `Não foi possível criar a padaria (${err?.code ?? err?.message ?? 'erro'}).`,
+      )
       setBusy(false)
     }
   }
