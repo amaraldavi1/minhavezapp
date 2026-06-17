@@ -12,6 +12,7 @@ import {
   getOwnerBakeryId,
   normalizeQueue,
   sortWaiting,
+  joinQueue,
   callNext as callNextOp,
   markServed as markServedOp,
   resetQueue as resetQueueOp,
@@ -33,6 +34,8 @@ export default function OwnerPanel() {
   const [logoFile, setLogoFile] = useState(null)
   const [logoPreview, setLogoPreview] = useState(null)
   const [logoUploading, setLogoUploading] = useState(false)
+  const [generatedTicket, setGeneratedTicket] = useState(null)
+  const [generating, setGenerating] = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -147,6 +150,19 @@ export default function OwnerPanel() {
     }
   }
 
+  async function handleGenerateTicket() {
+    if (generating) return
+    setGenerating(true)
+    try {
+      const number = await joinQueue(bakeryId)
+      setGeneratedTicket(number)
+    } catch (e) {
+      alert(`Erro ao gerar senha (${e?.code ?? e?.message}).`)
+    } finally {
+      setGenerating(false)
+    }
+  }
+
   async function handleCallNext() {
     if (!hasNext || busy) return
     setBusy(true)
@@ -216,6 +232,16 @@ export default function OwnerPanel() {
             {menuUrl ? '🔗 Editar cardápio' : '➕ Adicionar cardápio'}
           </button>
         </div>
+
+        {/* Manual ticket generation */}
+        <button
+          className="att-generate-btn"
+          onClick={handleGenerateTicket}
+          disabled={generating}
+        >
+          <span>🎫</span>
+          <span>{generating ? 'Gerando...' : 'Gerar senha para cliente sem celular'}</span>
+        </button>
 
         {/* Currently serving */}
         <div className={`att-serving-card ${isServing ? 'att-serving-active' : ''}`}>
@@ -310,6 +336,33 @@ export default function OwnerPanel() {
                 📺 Abrir monitor (balcão)
               </a>
               <button className="btn btn-ghost" onClick={() => setShowShare(false)}>
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Generated ticket overlay */}
+      {generatedTicket !== null && (
+        <div className="share-overlay" onClick={() => setGeneratedTicket(null)}>
+          <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+            <h2 className="share-title">Senha gerada!</h2>
+            <p className="share-sub">Informe este número ao cliente:</p>
+            <div className="generated-ticket-number">
+              #{generatedTicket}
+            </div>
+            <p className="share-sub" style={{ marginTop: '0.5rem' }}>
+              O cliente já está na fila de espera.
+            </p>
+            <div className="share-actions" style={{ marginTop: '1.25rem' }}>
+              <button
+                className="btn btn-primary w-full"
+                onClick={() => { setGeneratedTicket(null); handleGenerateTicket() }}
+              >
+                🎫 Gerar outra senha
+              </button>
+              <button className="btn btn-ghost" onClick={() => setGeneratedTicket(null)}>
                 Fechar
               </button>
             </div>

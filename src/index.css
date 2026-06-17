@@ -1074,6 +1074,44 @@ body {
   border-color: var(--amber);
 }
 
+/* Manual ticket generation button */
+.att-generate-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.95rem 1rem;
+  background: var(--white);
+  border: 2px solid var(--amber);
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-family: inherit;
+  font-weight: 700;
+  color: var(--amber-dark);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.att-generate-btn:hover:not(:disabled),
+.att-generate-btn:active:not(:disabled) {
+  background: var(--amber-light);
+}
+.att-generate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Generated ticket number in modal */
+.generated-ticket-number {
+  font-size: 6rem;
+  font-weight: 900;
+  color: var(--amber-darker);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin: 1rem 0 0.25rem;
+}
+
 /* Outline button (client "ver cardápio") */
 .btn-outline {
   background: var(--white);
