@@ -89,6 +89,7 @@ export default function OwnerPanel() {
 
   const sortedWaiting = sortWaiting(queue.waiting)
   const currentlyServing = queue.state?.currentlyServing ?? null
+  const servingName = queue.state?.servingName ?? null
   const isServing = currentlyServing !== null
   const totalWaiting = sortedWaiting.length
   const hasNext = totalWaiting > 0
@@ -252,7 +253,10 @@ export default function OwnerPanel() {
         <div className={`att-serving-card ${isServing ? 'att-serving-active' : ''}`}>
           <span className="att-serving-label">Atendendo agora</span>
           {isServing ? (
-            <span className="att-serving-number">#{currentlyServing}</span>
+            <>
+              <span className="att-serving-number">#{currentlyServing}</span>
+              {servingName && <span className="att-serving-client-name">{servingName}</span>}
+            </>
           ) : (
             <>
               <span className="att-serving-dash">—</span>

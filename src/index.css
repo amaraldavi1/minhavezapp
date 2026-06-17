@@ -1580,6 +1580,16 @@ body {
     0 4px 24px rgba(0, 0, 0, 0.6);
 }
 
+.monitor-serving-name {
+  display: block;
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  font-weight: 700;
+  color: #FEF3C7;
+  letter-spacing: -0.01em;
+  margin-top: 0.35rem;
+  opacity: 0.9;
+}
+
 .monitor-serving-idle {
   font-size: clamp(5rem, 16vw, 12rem);
   font-weight: 900;
@@ -1627,21 +1637,48 @@ body {
 }
 
 .monitor-next-ticket {
-  font-size: clamp(1.5rem, 4vw, 2.25rem);
-  font-weight: 800;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   color: rgba(255, 255, 255, 0.35);
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 0.4rem 0.9rem;
-  letter-spacing: -0.02em;
   min-width: 3.5rem;
   text-align: center;
   transition: color 0.3s, background 0.3s;
+}
+
+.monitor-next-num {
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.monitor-next-name {
+  font-size: clamp(0.65rem, 1.5vw, 0.9rem);
+  font-weight: 600;
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 8rem;
+  margin-top: 0.15rem;
 }
 
 .monitor-next-first {
   color: #FEF3C7;
   background: rgba(245, 158, 11, 0.15);
   border-color: rgba(245, 158, 11, 0.35);
+}
+
+/* Name below serving number in owner panel */
+.att-serving-client-name {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--green-dark);
+  margin-top: 0.35rem;
 }

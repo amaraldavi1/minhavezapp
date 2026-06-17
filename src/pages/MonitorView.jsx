@@ -62,6 +62,7 @@ export default function MonitorView() {
 
   const sortedWaiting = sortWaiting(queue.waiting)
   const currentlyServing = queue.state?.currentlyServing ?? null
+  const servingName = queue.state?.servingName ?? null
   const bakeryName = queue.info?.name ?? 'Padaria'
   const logoUrl = queue.info?.logoUrl ?? null
   const nextTickets = sortedWaiting.slice(0, 6)
@@ -83,7 +84,12 @@ export default function MonitorView() {
         <p className="monitor-serving-label">ATENDENDO AGORA</p>
         <div className={`monitor-serving-card ${flash ? 'monitor-flash' : ''}`}>
           {currentlyServing !== null ? (
-            <span className="monitor-serving-number">{currentlyServing}</span>
+            <>
+              <span className="monitor-serving-number">{currentlyServing}</span>
+              {servingName && (
+                <span className="monitor-serving-name">{servingName}</span>
+              )}
+            </>
           ) : (
             <span className="monitor-serving-idle">—</span>
           )}
@@ -105,9 +111,10 @@ export default function MonitorView() {
             <span className="monitor-next-empty">Fila vazia</span>
           ) : (
             nextTickets.map((t, i) => (
-              <span key={t.number} className={`monitor-next-ticket ${i === 0 ? 'monitor-next-first' : ''}`}>
-                {t.number}
-              </span>
+              <div key={t.number} className={`monitor-next-ticket ${i === 0 ? 'monitor-next-first' : ''}`}>
+                <span className="monitor-next-num">{t.number}</span>
+                {t.name && <span className="monitor-next-name">{t.name}</span>}
+              </div>
             ))
           )}
         </div>

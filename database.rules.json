@@ -30,6 +30,10 @@
             ".write": "auth != null && (root.child('bakeries').child($bid).child('info').child('ownerUid').val() === auth.uid || root.child('superadmins').child(auth.uid).exists())",
             ".validate": "newData.isNumber() || newData.val() === null"
           },
+          "servingName": {
+            ".write": "auth != null && (root.child('bakeries').child($bid).child('info').child('ownerUid').val() === auth.uid || root.child('superadmins').child(auth.uid).exists())",
+            ".validate": "newData.isString() && newData.val().length <= 80"
+          },
           "nextTicketNumber": {
             ".write": "auth != null && (root.child('bakeries').child($bid).child('info').child('ownerUid').val() === auth.uid || root.child('superadmins').child(auth.uid).exists() || (data.exists() && newData.val() === data.val() + 1))",
             ".validate": "newData.isNumber() && newData.val() >= 1"

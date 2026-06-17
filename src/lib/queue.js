@@ -83,6 +83,7 @@ export function setMenuUrl(bakeryId, url) {
 export function callNext(bakeryId, next) {
   return update(ref(db, `bakeries/${bakeryId}`), {
     'state/currentlyServing': next.number,
+    'state/servingName': next.name ?? null,
     [`waiting/${padTicket(next.number)}`]: null,
   })
 }
@@ -92,10 +93,11 @@ export function markServed(bakeryId, next) {
   if (next) {
     return update(ref(db, `bakeries/${bakeryId}`), {
       'state/currentlyServing': next.number,
+      'state/servingName': next.name ?? null,
       [`waiting/${padTicket(next.number)}`]: null,
     })
   }
-  return update(ref(db, `bakeries/${bakeryId}/state`), { currentlyServing: null })
+  return update(ref(db, `bakeries/${bakeryId}/state`), { currentlyServing: null, servingName: null })
 }
 
 /** Clears the queue for end of day, preserving the bakery's info/ownership.
