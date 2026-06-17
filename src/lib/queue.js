@@ -1,5 +1,5 @@
 import { ref, get, set, push, update, remove, runTransaction } from 'firebase/database'
-import { db } from '../firebase'
+import { db, auth } from '../firebase'
 
 export function padTicket(n) {
   return String(n).padStart(4, '0')
@@ -56,17 +56,18 @@ export async function createBakery(uid, email, name) {
  *  The transaction targets ONLY state/nextTicketNumber — never the whole
  *  state node — so it doesn't touch currentlyServing, which the security
  *  rules reserve for the owner. */
-export async function joinQueue(bakeryId) {
+export async function joinQueue(bakeryId, name) {
+  const uid = auth.currentUser?.uid ?? null
   const result = await runTransaction(
     ref(db, `bakeries/${bakeryId}/state/nextTicketNumber`),
     (current) => (current ?? 1) + 1,
   )
   // The committed value is the next ticket; ours is one below it.
   const ticketNumber = result.snapshot.val() - 1
-  await update(ref(db, `bakeries/${bakeryId}/waiting/${padTicket(ticketNumber)}`), {
-    number: ticketNumber,
-    joinedAt: Date.now(),
-  })
+  const entry = { number: ticketNumber, joinedAt: Date.now() }
+  if (uid) entry.uid = uid
+  if (name && name.trim()) entry.name = name.trim()
+  await update(ref(db, `bakeries/${bakeryId}/waiting/${padTicket(ticketNumber)}`), entry)
   return ticketNumber
 }
 
@@ -77,6 +78,9 @@ export function leaveQueue(bakeryId, ticketNumber) {
 /** Sets (or clears, when empty) the menu link shown to customers. */
 export function setMenuUrl(bakeryId, url) {
   const value = url && url.trim() ? url.trim() : null
+  if (value && !/^https?:\/\/.+/.test(value)) {
+    return Promise.reject(new Error('URL inválida. Deve começar com https:// ou http://'))
+  }
   return update(ref(db, `bakeries/${bakeryId}/info`), { menuUrl: value })
 }
 
@@ -84,6 +88,7 @@ export function setMenuUrl(bakeryId, url) {
 export function callNext(bakeryId, next) {
   return update(ref(db, `bakeries/${bakeryId}`), {
     'state/currentlyServing': next.number,
+    'state/servingName': next.name ?? null,
     [`waiting/${padTicket(next.number)}`]: null,
   })
 }
@@ -93,10 +98,11 @@ export function markServed(bakeryId, next) {
   if (next) {
     return update(ref(db, `bakeries/${bakeryId}`), {
       'state/currentlyServing': next.number,
+      'state/servingName': next.name ?? null,
       [`waiting/${padTicket(next.number)}`]: null,
     })
   }
-  return update(ref(db, `bakeries/${bakeryId}/state`), { currentlyServing: null })
+  return update(ref(db, `bakeries/${bakeryId}/state`), { currentlyServing: null, servingName: null })
 }
 
 /** Clears the queue for end of day, preserving the bakery's info/ownership.

@@ -3,6 +3,7 @@ import Landing from './pages/Landing.jsx'
 import OwnerLogin from './pages/OwnerLogin.jsx'
 import OwnerPanel from './pages/OwnerPanel.jsx'
 import ClientView from './pages/ClientView.jsx'
+import MonitorView from './pages/MonitorView.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import RequireAuth from './auth/RequireAuth.jsx'
 import RequireSuperadmin from './auth/RequireSuperadmin.jsx'
@@ -31,6 +32,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/fila/:bakeryId" element={<ClientView />} />
+      <Route path="/monitor/:bakeryId" element={<MonitorView />} />
       <Route path="/painel/login" element={<OwnerLogin />} />
       <Route
         path="/painel"

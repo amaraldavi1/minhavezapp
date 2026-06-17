@@ -178,8 +178,9 @@ export default function ClientView() {
   const sortedWaiting = sortWaiting(queue.waiting)
   const currentlyServing = queue.state?.currentlyServing ?? null
   const bakeryName = queue.info?.name ?? 'Padaria'
-  const menuUrl = queue.info?.menuUrl ?? null
   const logoUrl = queue.info?.logoUrl ?? null
+  const menuUrlRaw = queue.info?.menuUrl ?? null
+  const menuUrl = menuUrlRaw && /^https?:\/\/.+/.test(menuUrlRaw) ? menuUrlRaw : null
   const isMyTurn = myTicket !== null && currentlyServing === myTicket
   const myIndex = sortedWaiting.findIndex((t) => t.number === myTicket)
   const isWaiting = myIndex !== -1

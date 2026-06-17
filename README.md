@@ -29,6 +29,7 @@ Cada padaria tem sua própria conta, fila isolada e QR Code exclusivo.
 | `/painel/login` | Dono | Envio/conclusão do link mágico |
 | `/painel` | Dono (autenticado) | Onboarding (1ª vez) → painel da fila |
 | `/fila/:bakeryId` | Cliente | Tela de fila acessada via QR Code |
+| `/monitor/:bakeryId` | Balcão | Painel de display em tempo real (TV/monitor) |
 | `/admin` | Superadmin | Gerencia todas as padarias e administradores |
 
 ## Configuração do Firebase
