@@ -1044,3 +1044,254 @@ body {
   padding: 0.15em 0.4em;
   border-radius: 4px;
 }
+
+/* ============================
+   OWNER PANEL — extra actions
+============================ */
+.att-header-actions {
+  display: flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.att-menu-btn {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  font-size: 0.92rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--amber-dark);
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.15s, border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.att-menu-btn:hover,
+.att-menu-btn:active {
+  background: var(--amber-lighter);
+  border-color: var(--amber);
+}
+
+/* Outline button (client "ver cardápio") */
+.btn-outline {
+  background: var(--white);
+  color: var(--amber-dark);
+  border: 2px solid var(--amber);
+  box-shadow: none;
+}
+.btn-outline:hover:not(:disabled) {
+  background: var(--amber-lighter);
+}
+
+.menu-link {
+  text-decoration: none;
+  margin-top: 0.25rem;
+}
+
+/* ============================
+   ADMIN DASHBOARD
+============================ */
+.admin-view {
+  min-height: 100dvh;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--amber-darker);
+  letter-spacing: -0.02em;
+}
+
+.admin-sub {
+  font-size: 0.85rem;
+  color: var(--gray);
+  margin-top: 0.1rem;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.admin-stat {
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  padding: 1rem 0.5rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.admin-stat-value {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--amber-darker);
+  display: block;
+  line-height: 1;
+}
+
+.admin-stat-label {
+  font-size: 0.72rem;
+  color: var(--gray);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.35rem;
+  display: block;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--gray-light);
+  padding: 0.3rem;
+  border-radius: var(--radius-sm);
+}
+
+.admin-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: 9px;
+  padding: 0.7rem 0.5rem;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--gray);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.admin-tab-active {
+  background: var(--white);
+  color: var(--amber-darker);
+  box-shadow: var(--shadow);
+}
+
+.admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin-empty {
+  text-align: center;
+  color: var(--gray);
+  padding: 2.5rem 1rem;
+  background: var(--white);
+  border-radius: var(--radius-sm);
+}
+
+.admin-card {
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.1rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.admin-card-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.admin-card-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.admin-card-meta {
+  font-size: 0.85rem;
+  color: var(--gray);
+  word-break: break-word;
+}
+
+.admin-card-uid {
+  font-size: 0.7rem;
+  color: #A8A29E;
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+}
+
+.admin-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+}
+
+.admin-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--amber-light);
+  color: var(--amber-dark);
+  padding: 0.2rem 0.55rem;
+  border-radius: 100px;
+}
+
+.admin-tag-green {
+  background: var(--green-light);
+  color: var(--green-dark);
+}
+
+.admin-tag-muted {
+  background: var(--gray-light);
+  color: var(--gray);
+}
+
+.admin-card-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.admin-mini-btn {
+  background: var(--gray-light);
+  border: none;
+  border-radius: 9px;
+  padding: 0.5rem 0.8rem;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.admin-mini-btn:hover {
+  background: var(--border);
+}
+
+.admin-mini-danger {
+  background: var(--red-light);
+  color: var(--red-dark);
+}
+.admin-mini-danger:hover {
+  background: #FCA5A5;
+}

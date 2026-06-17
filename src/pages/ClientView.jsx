@@ -178,6 +178,7 @@ export default function ClientView() {
   const sortedWaiting = sortWaiting(queue.waiting)
   const currentlyServing = queue.state?.currentlyServing ?? null
   const bakeryName = queue.info?.name ?? 'Padaria'
+  const menuUrl = queue.info?.menuUrl ?? null
   const isMyTurn = myTicket !== null && currentlyServing === myTicket
   const myIndex = sortedWaiting.findIndex((t) => t.number === myTicket)
   const isWaiting = myIndex !== -1
@@ -277,6 +278,17 @@ export default function ClientView() {
       >
         {joining ? '⏳ Aguarde...' : '🎫 Entrar na Fila'}
       </button>
+
+      {menuUrl && (
+        <a
+          className="btn btn-outline join-btn menu-link"
+          href={menuUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          📋 Ver cardápio
+        </a>
+      )}
     </div>
   )
 }

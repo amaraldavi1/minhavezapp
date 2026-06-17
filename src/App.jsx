@@ -3,7 +3,9 @@ import Landing from './pages/Landing.jsx'
 import OwnerLogin from './pages/OwnerLogin.jsx'
 import OwnerPanel from './pages/OwnerPanel.jsx'
 import ClientView from './pages/ClientView.jsx'
+import AdminDashboard from './pages/AdminDashboard.jsx'
 import RequireAuth from './auth/RequireAuth.jsx'
+import RequireSuperadmin from './auth/RequireSuperadmin.jsx'
 import { firebaseConfigured } from './firebase.js'
 
 function ConfigError() {
@@ -35,6 +37,16 @@ export default function App() {
         element={
           <RequireAuth>
             <OwnerPanel />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <RequireAuth>
+            <RequireSuperadmin>
+              <AdminDashboard />
+            </RequireSuperadmin>
           </RequireAuth>
         }
       />

@@ -74,6 +74,12 @@ export function leaveQueue(bakeryId, ticketNumber) {
   return remove(ref(db, `bakeries/${bakeryId}/waiting/${padTicket(ticketNumber)}`))
 }
 
+/** Sets (or clears, when empty) the menu link shown to customers. */
+export function setMenuUrl(bakeryId, url) {
+  const value = url && url.trim() ? url.trim() : null
+  return update(ref(db, `bakeries/${bakeryId}/info`), { menuUrl: value })
+}
+
 /** Moves the first waiting ticket into "currently serving". */
 export function callNext(bakeryId, next) {
   return update(ref(db, `bakeries/${bakeryId}`), {

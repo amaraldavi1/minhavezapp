@@ -29,6 +29,7 @@ Cada padaria tem sua própria conta, fila isolada e QR Code exclusivo.
 | `/painel/login` | Dono | Envio/conclusão do link mágico |
 | `/painel` | Dono (autenticado) | Onboarding (1ª vez) → painel da fila |
 | `/fila/:bakeryId` | Cliente | Tela de fila acessada via QR Code |
+| `/admin` | Superadmin | Gerencia todas as padarias e administradores |
 
 ## Configuração do Firebase
 
@@ -45,6 +46,31 @@ Cada padaria tem sua própria conta, fila isolada e QR Code exclusivo.
 
 5. **Registre um app Web** e copie as credenciais para o `.env.local`
    (veja `.env.example`)
+
+## Superadmin (painel `/admin`)
+
+O acesso ao painel do sistema é controlado pelo nó `/superadmins/{uid}` no
+Realtime Database — que é também a fonte de verdade das regras de segurança.
+
+Para **promover o primeiro superadmin** (bootstrap manual, feito uma vez):
+
+1. Faça login normalmente em `/painel/login` com o e-mail que será superadmin
+2. No Console Firebase → **Authentication → Users**, copie o **User UID** desse e-mail
+3. No Console Firebase → **Realtime Database**, crie o nó:
+   ```json
+   { "superadmins": { "COLE_O_UID_AQUI": true } }
+   ```
+4. Recarregue o app — o botão **⚙️ Admin** aparece no painel e a rota
+   `/admin` fica liberada
+
+No painel `/admin` o superadmin pode: listar/renomear/excluir qualquer
+padaria e remover administradores (apaga o usuário e a padaria dele).
+
+## Cardápio do cliente
+
+No painel do dono, o botão **"Adicionar link do cardápio"** salva uma URL
+(`info.menuUrl`) que aparece como **"📋 Ver cardápio"** na tela do cliente,
+antes dele entrar na fila. Pode ser um PDF, Instagram, site, etc.
 
 ## Rodando localmente
 
