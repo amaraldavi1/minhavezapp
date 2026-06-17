@@ -7,6 +7,7 @@ import {
 } from 'firebase/auth'
 import { auth } from '../firebase'
 import { useAuth } from '../auth/AuthContext'
+import { isAllowedEmail } from '../lib/invites'
 
 const EMAIL_KEY = 'minhavez_email_for_signin'
 
@@ -61,12 +62,23 @@ export default function OwnerLogin() {
     if (!email || submitting) return
     setSubmitting(true)
     setError('')
+    const address = email.trim()
     try {
-      await sendSignInLinkToEmail(auth, email.trim(), {
+      const allowed = await isAllowedEmail(address)
+      if (!allowed) {
+        setError(
+          'Este e-mail não está autorizado a acessar o painel. ' +
+          'O cadastro de padarias é feito pelo administrador do sistema. ' +
+          'Entre em contato para solicitar acesso.',
+        )
+        setSubmitting(false)
+        return
+      }
+      await sendSignInLinkToEmail(auth, address, {
         url: window.location.origin + '/painel/login',
         handleCodeInApp: true,
       })
-      window.localStorage.setItem(EMAIL_KEY, email.trim())
+      window.localStorage.setItem(EMAIL_KEY, address)
       setSent(true)
     } catch (err) {
       console.error('sendSignInLinkToEmail failed:', err)

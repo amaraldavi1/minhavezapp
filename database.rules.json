@@ -68,6 +68,15 @@
         ".read": "auth != null && auth.token.email != null",
         ".write": "auth != null && (root.child('superadmins').child(auth.uid).exists() || (!newData.exists() && auth.token.email != null))"
       }
+    },
+
+    "allowedEmails": {
+      ".read": "auth != null && root.child('superadmins').child(auth.uid).exists()",
+      "$encodedEmail": {
+        ".read": true,
+        ".write": "auth != null && root.child('superadmins').child(auth.uid).exists()",
+        ".validate": "newData.isBoolean()"
+      }
     }
   }
 }

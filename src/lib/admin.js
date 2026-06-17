@@ -1,4 +1,4 @@
-import { ref, get, set, push, onValue, update } from 'firebase/database'
+import { ref, get, push, onValue, update } from 'firebase/database'
 import { sendSignInLinkToEmail } from 'firebase/auth'
 import { db, auth } from '../firebase'
 import { encodeEmail } from './invites'
@@ -41,24 +41,26 @@ export function subscribeSystem(callback, onError) {
   return () => { u1(); u2() }
 }
 
-/** Creates an unclaimed bakery and a matching invite for the owner email. */
+/** Creates an unclaimed bakery, an invite, and authorizes the owner's e-mail.
+ *  Done atomically so the e-mail is never authorized without a matching bakery. */
 export async function createBakeryAdmin(name, ownerEmail) {
   const email = ownerEmail.trim().toLowerCase()
-  const bakeryRef = push(ref(db, 'bakeries'))
-  const bakeryId = bakeryRef.key
-  await set(bakeryRef, {
-    info: {
+  const bakeryId = push(ref(db, 'bakeries')).key
+  const encoded = encodeEmail(email)
+  await update(ref(db), {
+    [`bakeries/${bakeryId}/info`]: {
       name: name.trim(),
       ownerUid: 'unclaimed',
       ownerEmail: email,
       createdAt: Date.now(),
     },
-  })
-  await set(ref(db, `invites/${encodeEmail(email)}`), {
-    bakeryId,
-    bakeryName: name.trim(),
-    ownerEmail: email,
-    createdAt: Date.now(),
+    [`invites/${encoded}`]: {
+      bakeryId,
+      bakeryName: name.trim(),
+      ownerEmail: email,
+      createdAt: Date.now(),
+    },
+    [`allowedEmails/${encoded}`]: true,
   })
   return bakeryId
 }
@@ -76,22 +78,25 @@ export function renameBakery(bakeryId, name) {
   return update(ref(db, `bakeries/${bakeryId}/info`), { name: name.trim() })
 }
 
-/** Deletes a bakery and unlinks it from its owner.
- *  Also removes the invite if the bakery was unclaimed. */
+/** Deletes a bakery, unlinks its owner, removes the invite, and revokes the
+ *  owner's e-mail authorization so they can no longer request a sign-in link. */
 export function deleteBakery(bakeryId, ownerUid, ownerEmail) {
   const updates = { [`bakeries/${bakeryId}`]: null }
   if (ownerUid && ownerUid !== 'unclaimed') {
     updates[`users/${ownerUid}/bakeryId`] = null
   }
   if (ownerEmail) {
-    updates[`invites/${encodeEmail(ownerEmail)}`] = null
+    const encoded = encodeEmail(ownerEmail)
+    updates[`invites/${encoded}`] = null
+    updates[`allowedEmails/${encoded}`] = null
   }
   return update(ref(db), updates)
 }
 
-/** Fully removes an administrator: their user record and their bakery. */
-export function deleteAdmin(uid, bakeryId) {
+/** Fully removes an administrator: user record, bakery, and e-mail authorization. */
+export function deleteAdmin(uid, bakeryId, email) {
   const updates = { [`users/${uid}`]: null }
   if (bakeryId) updates[`bakeries/${bakeryId}`] = null
+  if (email) updates[`allowedEmails/${encodeEmail(email)}`] = null
   return update(ref(db), updates)
 }

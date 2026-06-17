@@ -168,7 +168,7 @@ export default function AdminDashboard() {
 
   async function handleDeleteAdmin(a) {
     if (!confirm(`Remover o administrador "${a.email}"?\n\nIsso apaga o registro do usuário E a padaria dele${a.bakeryName ? ` ("${a.bakeryName}")` : ''}.`)) return
-    try { await deleteAdmin(a.uid, a.bakeryId) }
+    try { await deleteAdmin(a.uid, a.bakeryId, a.email) }
     catch (e) { alert(`Erro ao remover (${e?.code ?? e?.message}).`) }
   }
 
