@@ -30,6 +30,7 @@ export default function OwnerPanel() {
   const [showShare, setShowShare] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const [menuInput, setMenuInput] = useState('')
+  const [menuError, setMenuError] = useState('')
   const [showLogo, setShowLogo] = useState(false)
   const [logoFile, setLogoFile] = useState(null)
   const [logoPreview, setLogoPreview] = useState(null)
@@ -101,15 +102,22 @@ export default function OwnerPanel() {
 
   function openMenuModal() {
     setMenuInput(menuUrl)
+    setMenuError('')
     setShowMenu(true)
   }
 
   async function saveMenu() {
+    const v = menuInput.trim()
+    if (v && !/^https?:\/\/.+/.test(v)) {
+      setMenuError('URL inválida. Deve começar com https:// ou http://')
+      return
+    }
+    setMenuError('')
     try {
       await setMenuUrlOp(bakeryId, menuInput)
       setShowMenu(false)
     } catch (e) {
-      alert(`Erro ao salvar o cardápio (${e?.code ?? e?.message}).`)
+      setMenuError(e?.message ?? 'Erro ao salvar o cardápio.')
     }
   }
 
@@ -132,7 +140,7 @@ export default function OwnerPanel() {
     if (!logoFile || logoUploading) return
     setLogoUploading(true)
     try {
-      await uploadLogo(bakeryId, logoFile)
+      await uploadLogo(bakeryId, user.uid, logoFile)
       setShowLogo(false)
       setLogoFile(null)
       setLogoPreview(null)
@@ -146,7 +154,7 @@ export default function OwnerPanel() {
   async function handleLogoRemove() {
     if (!confirm('Remover a logomarca do estabelecimento?')) return
     try {
-      await removeLogo(bakeryId, logoUrl)
+      await removeLogo(bakeryId, user.uid)
       setShowLogo(false)
     } catch (e) {
       alert(`Erro ao remover a logomarca (${e?.code ?? e?.message}).`)
@@ -488,10 +496,12 @@ export default function OwnerPanel() {
                 type="url"
                 inputMode="url"
                 value={menuInput}
-                onChange={(e) => setMenuInput(e.target.value)}
+                onChange={(e) => { setMenuInput(e.target.value); setMenuError('') }}
+                onKeyDown={(e) => e.key === 'Enter' && saveMenu()}
                 placeholder="https://..."
-                className="input-field input-text"
+                className={`input-field input-text ${menuError ? 'input-error' : ''}`}
               />
+              {menuError && <span className="error-msg">❌ {menuError}</span>}
             </div>
             <div className="share-actions">
               <button className="btn btn-primary w-full" onClick={saveMenu}>

@@ -17,12 +17,12 @@
 
         "info": {
           ".write": "auth != null && ((newData.child('ownerUid').val() === auth.uid && (!data.exists() || data.child('ownerUid').val() === auth.uid)) || root.child('superadmins').child(auth.uid).exists())",
-          "name": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60" },
-          "ownerUid": { ".validate": "newData.isString()" },
+          "name":      { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60" },
+          "ownerUid":  { ".validate": "newData.isString()" },
           "createdAt": { ".validate": "newData.isNumber()" },
-          "menuUrl": { ".validate": "newData.isString() && newData.val().length <= 500" },
-          "logoUrl": { ".validate": "newData.isString() && newData.val().length <= 2000" },
-          "$other": { ".validate": false }
+          "menuUrl":   { ".validate": "newData.isString() && newData.val().length <= 500 && newData.val().matches('^https?://.+')" },
+          "logoUrl":   { ".validate": "newData.isString() && newData.val().length <= 2000" },
+          "$other":    { ".validate": false }
         },
 
         "state": {
@@ -41,11 +41,13 @@
         },
 
         "waiting": {
-          ".write": "auth != null",
+          ".write": "auth != null && (root.child('bakeries').child($bid).child('info').child('ownerUid').val() === auth.uid || root.child('superadmins').child(auth.uid).exists())",
           "$ticket": {
-            "number": { ".validate": "newData.isNumber()" },
+            ".write": "auth != null && (!data.exists() || data.child('uid').val() === auth.uid)",
+            "number":   { ".validate": "newData.isNumber()" },
             "joinedAt": { ".validate": "newData.isNumber()" },
-            "name": { ".validate": "newData.isString() && newData.val().length <= 80" }
+            "name":     { ".validate": "newData.isString() && newData.val().length <= 80" },
+            "uid":      { ".validate": "newData.isString() && newData.val() === auth.uid" }
           }
         }
       }
