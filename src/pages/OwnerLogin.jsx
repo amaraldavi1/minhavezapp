@@ -65,7 +65,33 @@ export default function OwnerLogin() {
       window.localStorage.setItem(EMAIL_KEY, email.trim())
       setSent(true)
     } catch (err) {
-      setError('Não foi possível enviar o link. Verifique o e-mail e tente novamente.')
+      console.error('sendSignInLinkToEmail failed:', err)
+      const code = err?.code ?? ''
+      let msg
+      switch (code) {
+        case 'auth/operation-not-allowed':
+          msg = 'Login por link de e-mail não está habilitado no Firebase. ' +
+                'Ative em Authentication → Sign-in method → E-mail/senha → ' +
+                '"Link de e-mail (login sem senha)".'
+          break
+        case 'auth/unauthorized-continue-uri':
+        case 'auth/invalid-continue-uri':
+          msg = `O domínio "${window.location.hostname}" não está autorizado. ` +
+                'Adicione-o em Authentication → Settings → Domínios autorizados.'
+          break
+        case 'auth/invalid-email':
+          msg = 'E-mail inválido. Verifique e tente novamente.'
+          break
+        case 'auth/too-many-requests':
+          msg = 'Muitas tentativas. Aguarde alguns minutos e tente novamente.'
+          break
+        case 'auth/network-request-failed':
+          msg = 'Falha de conexão. Verifique sua internet e tente novamente.'
+          break
+        default:
+          msg = `Não foi possível enviar o link${code ? ` (${code})` : ''}. Tente novamente.`
+      }
+      setError(msg)
     } finally {
       setSubmitting(false)
     }
