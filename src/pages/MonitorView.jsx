@@ -4,6 +4,7 @@ import { ref, onValue } from 'firebase/database'
 import { QRCodeSVG } from 'qrcode.react'
 import { db } from '../firebase'
 import { normalizeQueue, sortWaiting } from '../lib/queue'
+import BrandLogo from '../components/BrandLogo'
 
 function Clock() {
   const [time, setTime] = useState(() => new Date())
@@ -64,7 +65,7 @@ export default function MonitorView() {
   const sortedWaiting = sortWaiting(queue.waiting)
   const currentlyServing = queue.state?.currentlyServing ?? null
   const servingName = queue.state?.servingName ?? null
-  const bakeryName = queue.info?.name ?? 'Padaria'
+  const bakeryName = queue.info?.name ?? 'Atendimento'
   const logoUrl = queue.info?.logoUrl ?? null
   const nextTickets = sortedWaiting.slice(0, 6)
   const clientLink = `${window.location.origin}/fila/${bakeryId}`
@@ -80,7 +81,7 @@ export default function MonitorView() {
         <div className="monitor-header-left">
           {logoUrl
             ? <img src={logoUrl} alt="Logo" className="monitor-logo" />
-            : <span className="monitor-logo monitor-logo-fallback">🍞</span>
+            : <BrandLogo size={56} className="monitor-logo-mark" />
           }
           <div className="monitor-header-titles">
             <span className="monitor-bakery-name">{bakeryName}</span>

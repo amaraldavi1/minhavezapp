@@ -4,6 +4,7 @@ import { ref, onValue } from 'firebase/database'
 import { db } from '../firebase'
 import { ensureAnonAuth } from '../lib/anonClient'
 import { normalizeQueue, sortWaiting, joinQueue, leaveQueue } from '../lib/queue'
+import BrandLogo from '../components/BrandLogo'
 
 function storageKey(bakeryId) {
   return `minhavez_ticket_${bakeryId}`
@@ -168,7 +169,7 @@ export default function ClientView() {
         <span className="served-icon">🔍</span>
         <h2 className="served-title">Fila não encontrada</h2>
         <p className="served-message">
-          Este QR Code não é válido ou a padaria ainda não configurou a fila.
+          Este QR Code não é válido ou o estabelecimento ainda não configurou a fila.
           Peça ajuda a um atendente.
         </p>
       </div>
@@ -177,7 +178,7 @@ export default function ClientView() {
 
   const sortedWaiting = sortWaiting(queue.waiting)
   const currentlyServing = queue.state?.currentlyServing ?? null
-  const bakeryName = queue.info?.name ?? 'Padaria'
+  const bakeryName = queue.info?.name ?? 'Atendimento'
   const logoUrl = queue.info?.logoUrl ?? null
   const menuUrlRaw = queue.info?.menuUrl ?? null
   const menuUrl = menuUrlRaw && /^https?:\/\/.+/.test(menuUrlRaw) ? menuUrlRaw : null
@@ -210,7 +211,7 @@ export default function ClientView() {
         <div className="page-header">
           {logoUrl
             ? <img src={logoUrl} alt={bakeryName} className="bakery-logo" />
-            : <span className="page-icon">🍞</span>
+            : <BrandLogo size={56} className="page-logo-mark" />
           }
           <h1 className="page-title">{bakeryName}</h1>
         </div>
@@ -269,7 +270,7 @@ export default function ClientView() {
       <div className="page-header">
         {logoUrl
           ? <img src={logoUrl} alt={bakeryName} className="bakery-logo" />
-          : <span className="page-icon">🍞</span>
+          : <BrandLogo size={56} className="page-logo-mark" />
         }
         <h1 className="page-title">{bakeryName}</h1>
         <p className="page-subtitle">
@@ -294,7 +295,7 @@ export default function ClientView() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          📋 Ver cardápio
+          📄 Mais informações
         </a>
       )}
     </div>

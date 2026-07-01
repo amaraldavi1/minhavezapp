@@ -74,7 +74,7 @@ export default function OwnerPanel() {
     return (
       <div className="loading">
         <span className="loading-icon">⏳</span>
-        <p>Carregando sua padaria...</p>
+        <p>Carregando seu estabelecimento...</p>
       </div>
     )
   }
@@ -128,7 +128,7 @@ export default function OwnerPanel() {
             <span className="login-icon">🎉</span>
             <h1 className="login-title">Bem-vindo!</h1>
             <p className="login-subtitle">
-              Você foi convidado para gerenciar a padaria<br />
+              Você foi convidado para gerenciar o estabelecimento<br />
               <strong>{inviteData.bakeryName}</strong>
             </p>
             {claimError && <span className="error-msg" style={{ marginBottom: '0.5rem' }}>❌ {claimError}</span>}
@@ -152,7 +152,7 @@ export default function OwnerPanel() {
         <span className="served-icon">🔒</span>
         <h2 className="served-title">Acesso restrito</h2>
         <p className="served-message">
-          Este painel é exclusivo dos responsáveis pelas padarias cadastradas.
+          Este painel é exclusivo dos responsáveis pelos estabelecimentos cadastrados.
           Entre em contato com o administrador do sistema para solicitar acesso.
         </p>
         <button className="btn btn-ghost" onClick={handleLogoutRestricted}>
@@ -177,7 +177,7 @@ export default function OwnerPanel() {
   const isServing = currentlyServing !== null
   const totalWaiting = sortedWaiting.length
   const hasNext = totalWaiting > 0
-  const bakeryName = queue.info?.name ?? 'Minha Padaria'
+  const bakeryName = queue.info?.name ?? 'Meu estabelecimento'
   const menuUrl = queue.info?.menuUrl ?? ''
   const logoUrl = queue.info?.logoUrl ?? null
   const clientLink = `${window.location.origin}/fila/${bakeryId}`
@@ -200,7 +200,7 @@ export default function OwnerPanel() {
       await setMenuUrlOp(bakeryId, menuInput)
       setShowMenu(false)
     } catch (e) {
-      setMenuError(e?.message ?? 'Erro ao salvar o cardápio.')
+      setMenuError(e?.message ?? 'Erro ao salvar o link.')
     }
   }
 
@@ -330,7 +330,7 @@ export default function OwnerPanel() {
             {logoUrl ? '🖼️ Editar logomarca' : '🖼️ Adicionar logomarca'}
           </button>
           <button className="att-tool-btn" onClick={openMenuModal}>
-            {menuUrl ? '🔗 Editar cardápio' : '➕ Adicionar cardápio'}
+            {menuUrl ? '🔗 Editar link' : '➕ Adicionar link'}
           </button>
         </div>
 
@@ -434,7 +434,7 @@ export default function OwnerPanel() {
                 rel="noopener noreferrer"
                 style={{ textDecoration: 'none' }}
               >
-                📺 Abrir monitor (balcão)
+                📺 Abrir painel de senhas
               </a>
               <button className="btn btn-ghost" onClick={() => setShowShare(false)}>
                 Fechar
@@ -567,13 +567,13 @@ export default function OwnerPanel() {
       {showMenu && (
         <div className="share-overlay" onClick={() => setShowMenu(false)}>
           <div className="share-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="share-title">Link do cardápio</h2>
+            <h2 className="share-title">Link para clientes</h2>
             <p className="share-sub">
-              Cole o link do seu cardápio (PDF, Instagram, site...). Ele aparece
-              para o cliente antes de entrar na fila.
+              Cole um link para seus clientes (cardápio, catálogo, site,
+              Instagram...). Ele aparece antes de entrar na fila.
             </p>
             <div className="input-group" style={{ width: '100%', textAlign: 'left' }}>
-              <label htmlFor="menu" className="input-label">URL do cardápio</label>
+              <label htmlFor="menu" className="input-label">URL do link</label>
               <input
                 id="menu"
                 type="url"

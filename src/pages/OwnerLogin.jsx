@@ -8,6 +8,7 @@ import {
 import { auth } from '../firebase'
 import { useAuth } from '../auth/AuthContext'
 import { isAllowedEmail } from '../lib/invites'
+import BrandLogo from '../components/BrandLogo'
 
 const EMAIL_KEY = 'minhavez_email_for_signin'
 
@@ -68,7 +69,7 @@ export default function OwnerLogin() {
       if (!allowed) {
         setError(
           'Este e-mail não está autorizado a acessar o painel. ' +
-          'O cadastro de padarias é feito pelo administrador do sistema. ' +
+          'O cadastro de estabelecimentos é feito pelo administrador do sistema. ' +
           'Entre em contato para solicitar acesso.',
         )
         setSubmitting(false)
@@ -125,7 +126,7 @@ export default function OwnerLogin() {
   return (
     <div className="login-view">
       <div className="login-card">
-        <span className="login-icon">🍞</span>
+        <BrandLogo size={56} />
         <h1 className="login-title">Acessar painel</h1>
 
         {sent ? (

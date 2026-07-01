@@ -119,7 +119,7 @@ export default function AdminDashboard() {
       setNewName('')
       setNewEmail('')
     } catch (e) {
-      setNewError(e?.message ?? `Erro ao criar padaria (${e?.code ?? 'desconhecido'}).`)
+      setNewError(e?.message ?? `Erro ao criar estabelecimento (${e?.code ?? 'desconhecido'}).`)
     } finally {
       setNewBusy(false)
     }
@@ -161,13 +161,13 @@ export default function AdminDashboard() {
   }
 
   async function handleDeleteBakery(b) {
-    if (!confirm(`Excluir a padaria "${b.name}"?\n\nA fila será apagada e o dono perderá o acesso.`)) return
+    if (!confirm(`Excluir o estabelecimento "${b.name}"?\n\nA fila será apagada e o responsável perderá o acesso.`)) return
     try { await deleteBakery(b.id, b.ownerUid, b.ownerEmailRaw) }
     catch (e) { alert(`Erro ao excluir (${e?.code ?? e?.message}).`) }
   }
 
   async function handleDeleteAdmin(a) {
-    if (!confirm(`Remover o administrador "${a.email}"?\n\nIsso apaga o registro do usuário E a padaria dele${a.bakeryName ? ` ("${a.bakeryName}")` : ''}.`)) return
+    if (!confirm(`Remover o administrador "${a.email}"?\n\nIsso apaga o registro do usuário E o estabelecimento dele${a.bakeryName ? ` ("${a.bakeryName}")` : ''}.`)) return
     try { await deleteAdmin(a.uid, a.bakeryId, a.email) }
     catch (e) { alert(`Erro ao remover (${e?.code ?? e?.message}).`) }
   }
@@ -191,7 +191,7 @@ export default function AdminDashboard() {
       <div className="admin-stats">
         <div className="admin-stat">
           <span className="admin-stat-value">{bakeries.length}</span>
-          <span className="admin-stat-label">padarias</span>
+          <span className="admin-stat-label">estabelecimentos</span>
         </div>
         <div className="admin-stat">
           <span className="admin-stat-value">{admins.length}</span>
@@ -209,7 +209,7 @@ export default function AdminDashboard() {
           className={`admin-tab ${tab === 'bakeries' ? 'admin-tab-active' : ''}`}
           onClick={() => setTab('bakeries')}
         >
-          🏪 Padarias {unclaimedCount > 0 && <span className="admin-tab-badge">{unclaimedCount}</span>}
+          🏪 Estabelecimentos {unclaimedCount > 0 && <span className="admin-tab-badge">{unclaimedCount}</span>}
         </button>
         <button
           className={`admin-tab ${tab === 'admins' ? 'admin-tab-active' : ''}`}
@@ -223,10 +223,10 @@ export default function AdminDashboard() {
       {tab === 'bakeries' && (
         <div className="admin-list">
           <button className="admin-new-btn" onClick={() => { setNewName(''); setNewEmail(''); setNewError(''); setShowNew(true) }}>
-            ＋ Nova padaria
+            ＋ Novo estabelecimento
           </button>
           {bakeries.length === 0 ? (
-            <div className="admin-empty">Nenhuma padaria cadastrada.</div>
+            <div className="admin-empty">Nenhum estabelecimento cadastrado.</div>
           ) : (
             bakeries.map((b) => (
               <div key={b.id} className={`admin-card ${b.unclaimed ? 'admin-card-unclaimed' : ''}`}>
@@ -285,7 +285,7 @@ export default function AdminDashboard() {
                 <div className="admin-card-main">
                   <span className="admin-card-name">{a.email}</span>
                   <span className="admin-card-meta">
-                    {a.bakeryName ? `🏪 ${a.bakeryName}` : 'sem padaria'}
+                    {a.bakeryName ? `🏪 ${a.bakeryName}` : 'sem estabelecimento'}
                   </span>
                   <span className="admin-card-uid">{a.uid}</span>
                 </div>
@@ -304,19 +304,19 @@ export default function AdminDashboard() {
       {showNew && (
         <div className="share-overlay" onClick={() => !newBusy && setShowNew(false)}>
           <div className="share-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="share-title">Nova padaria</h2>
+            <h2 className="share-title">Novo estabelecimento</h2>
             <p className="share-sub">
-              A padaria ficará aguardando até o responsável confirmar o acesso pelo link enviado.
+              O estabelecimento ficará aguardando até o responsável confirmar o acesso pelo link enviado.
             </p>
             <div className="input-group" style={{ width: '100%', textAlign: 'left', marginTop: '0.75rem' }}>
-              <label htmlFor="new-name" className="input-label">Nome da padaria</label>
+              <label htmlFor="new-name" className="input-label">Nome do estabelecimento</label>
               <input
                 id="new-name"
                 type="text"
                 value={newName}
                 onChange={(e) => { setNewName(e.target.value); setNewError('') }}
                 onKeyDown={(e) => e.key === 'Enter' && document.getElementById('new-email').focus()}
-                placeholder="Ex: Padaria Pão Quente"
+                placeholder="Ex: Barbearia Central"
                 maxLength={60}
                 autoFocus
                 className="input-field input-text"
@@ -330,7 +330,7 @@ export default function AdminDashboard() {
                 value={newEmail}
                 onChange={(e) => { setNewEmail(e.target.value); setNewError('') }}
                 onKeyDown={(e) => e.key === 'Enter' && handleCreateBakery()}
-                placeholder="dono@padaria.com"
+                placeholder="responsavel@empresa.com"
                 autoComplete="off"
                 className="input-field input-text"
               />
@@ -342,7 +342,7 @@ export default function AdminDashboard() {
                 onClick={handleCreateBakery}
                 disabled={newBusy || !newName.trim() || !newEmail.trim()}
               >
-                {newBusy ? '⏳ Criando...' : '🏪 Criar padaria'}
+                {newBusy ? '⏳ Criando...' : '🏪 Criar estabelecimento'}
               </button>
               <button className="btn btn-ghost" onClick={() => setShowNew(false)} disabled={newBusy}>
                 Cancelar
@@ -356,7 +356,7 @@ export default function AdminDashboard() {
       {renameModal && (
         <div className="share-overlay" onClick={() => !renameBusy && setRenameModal(null)}>
           <div className="share-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="share-title">Renomear padaria</h2>
+            <h2 className="share-title">Renomear estabelecimento</h2>
             <div className="input-group" style={{ width: '100%', textAlign: 'left', marginTop: '0.75rem' }}>
               <label htmlFor="rename-val" className="input-label">Novo nome</label>
               <input

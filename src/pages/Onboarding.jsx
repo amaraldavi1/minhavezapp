@@ -22,7 +22,7 @@ export default function Onboarding({ user, onCreated }) {
       setError(
         isPermission
           ? 'Permissão negada pelo banco. Publique as regras de segurança (database.rules.json) no Firebase.'
-          : `Não foi possível criar a padaria (${err?.code ?? err?.message ?? 'erro'}).`,
+          : `Não foi possível criar o estabelecimento (${err?.code ?? err?.message ?? 'erro'}).`,
       )
       setBusy(false)
     }
@@ -32,20 +32,20 @@ export default function Onboarding({ user, onCreated }) {
     <div className="login-view">
       <div className="login-card">
         <span className="login-icon">🏪</span>
-        <h1 className="login-title">Sua padaria</h1>
+        <h1 className="login-title">Seu estabelecimento</h1>
         <p className="login-subtitle">
           Vamos configurar! Como se chama o seu estabelecimento?
         </p>
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="input-group">
-            <label htmlFor="bname" className="input-label">Nome da padaria</label>
+            <label htmlFor="bname" className="input-label">Nome do estabelecimento</label>
             <input
               id="bname"
               type="text"
               value={name}
               onChange={(e) => { setName(e.target.value); setError('') }}
-              placeholder="Ex: Padaria Pão Quente"
+              placeholder="Ex: Barbearia Central"
               autoFocus
               maxLength={60}
               className={`input-field input-text ${error ? 'input-error' : ''}`}
