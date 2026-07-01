@@ -1582,14 +1582,66 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Main — currently serving */
+/* Main — currently serving + QR to join */
 .monitor-main {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.5rem, 5vw, 4rem);
+  padding: 2rem;
+  flex-wrap: wrap;
+}
+
+.monitor-serving-block {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 1.25rem;
-  padding: 2rem;
+  flex: 1 1 auto;
+  min-width: min(540px, 90vw);
+}
+
+/* QR panel — "Retire sua senha aqui" */
+.monitor-qr-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  flex: 0 0 auto;
+}
+
+.monitor-qr-title {
+  font-size: clamp(1.1rem, 2.4vw, 1.75rem);
+  font-weight: 800;
+  color: #FCD34D;
+  text-align: center;
+  letter-spacing: -0.01em;
+  max-width: 15ch;
+  line-height: 1.15;
+}
+
+.monitor-qr-box {
+  background: #FFFFFF;
+  padding: clamp(0.6rem, 1.5vw, 1rem);
+  border-radius: 20px;
+  line-height: 0;
+  box-shadow: 0 0 40px rgba(245, 158, 11, 0.25);
+}
+
+.monitor-qr-box svg {
+  width: clamp(150px, 18vw, 240px);
+  height: auto;
+  display: block;
+}
+
+.monitor-qr-hint {
+  font-size: clamp(0.75rem, 1.5vw, 1rem);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.02em;
+  text-align: center;
 }
 
 .monitor-serving-label {

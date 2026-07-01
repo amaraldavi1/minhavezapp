@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { ref, onValue } from 'firebase/database'
+import { QRCodeSVG } from 'qrcode.react'
 import { db } from '../firebase'
 import { normalizeQueue, sortWaiting } from '../lib/queue'
 
@@ -66,6 +67,7 @@ export default function MonitorView() {
   const bakeryName = queue.info?.name ?? 'Padaria'
   const logoUrl = queue.info?.logoUrl ?? null
   const nextTickets = sortedWaiting.slice(0, 6)
+  const clientLink = `${window.location.origin}/fila/${bakeryId}`
 
   return (
     <div className="monitor-view">
@@ -79,26 +81,36 @@ export default function MonitorView() {
         <Clock />
       </header>
 
-      {/* Main — currently serving */}
+      {/* Main — currently serving + QR to join */}
       <main className="monitor-main">
-        <p className="monitor-serving-label">ATENDENDO AGORA</p>
-        <div className={`monitor-serving-card ${flash ? 'monitor-flash' : ''}`}>
-          {currentlyServing !== null ? (
-            <>
-              <span className="monitor-serving-number">{currentlyServing}</span>
-              {servingName && (
-                <span className="monitor-serving-name">{servingName}</span>
-              )}
-            </>
-          ) : (
-            <span className="monitor-serving-idle">—</span>
+        <div className="monitor-serving-block">
+          <p className="monitor-serving-label">ATENDENDO AGORA</p>
+          <div className={`monitor-serving-card ${flash ? 'monitor-flash' : ''}`}>
+            {currentlyServing !== null ? (
+              <>
+                <span className="monitor-serving-number">{currentlyServing}</span>
+                {servingName && (
+                  <span className="monitor-serving-name">{servingName}</span>
+                )}
+              </>
+            ) : (
+              <span className="monitor-serving-idle">—</span>
+            )}
+          </div>
+          {!currentlyServing && (
+            <p className="monitor-idle-hint">
+              {sortedWaiting.length === 0 ? 'Nenhum cliente na fila' : 'Aguardando chamada'}
+            </p>
           )}
         </div>
-        {!currentlyServing && (
-          <p className="monitor-idle-hint">
-            {sortedWaiting.length === 0 ? 'Nenhum cliente na fila' : 'Aguardando chamada'}
-          </p>
-        )}
+
+        <aside className="monitor-qr-panel">
+          <span className="monitor-qr-title">Retire sua senha aqui</span>
+          <div className="monitor-qr-box">
+            <QRCodeSVG value={clientLink} size={220} level="M" includeMargin />
+          </div>
+          <span className="monitor-qr-hint">📷 Aponte a câmera do celular</span>
+        </aside>
       </main>
 
       {/* Footer — queue */}
