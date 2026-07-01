@@ -6,8 +6,29 @@ import { ensureAnonAuth } from '../lib/anonClient'
 import { normalizeQueue, sortWaiting, joinQueue, leaveQueue } from '../lib/queue'
 import BrandLogo from '../components/BrandLogo'
 
+const DB_URL = import.meta.env.VITE_FIREBASE_DATABASE_URL
+
 function storageKey(bakeryId) {
   return `minhavez_ticket_${bakeryId}`
+}
+
+async function startBackgroundWatch(bakeryId, ticketNumber) {
+  if (!('serviceWorker' in navigator) || !('Notification' in window)) return
+  try {
+    let perm = Notification.permission
+    if (perm === 'default') perm = await Notification.requestPermission()
+    if (perm !== 'granted') return
+    await navigator.serviceWorker.register('/sw.js', { scope: '/' })
+    const reg = await navigator.serviceWorker.ready
+    reg.active?.postMessage({ type: 'WATCH_TICKET', dbUrl: DB_URL, bakeryId, ticketNumber })
+  } catch (_) {}
+}
+
+function stopBackgroundWatch() {
+  if (!('serviceWorker' in navigator)) return
+  navigator.serviceWorker.ready
+    .then((reg) => reg.active?.postMessage({ type: 'CANCEL_WATCH' }))
+    .catch(() => {})
 }
 
 function playChime() {
@@ -88,6 +109,14 @@ export default function ClientView() {
       localStorage.removeItem(storageKey(bakeryId))
     }
   }, [queue, myTicket, bakeryId])
+
+  // Background notification: keep a SW SSE connection alive so the user
+  // is notified even when the tab is closed or the phone screen is off.
+  useEffect(() => {
+    if (!authReady || myTicket === null) return
+    startBackgroundWatch(bakeryId, myTicket)
+    return () => stopBackgroundWatch()
+  }, [authReady, myTicket, bakeryId])
 
   async function handleJoin() {
     setJoining(true)
