@@ -181,10 +181,10 @@ export default function AdminDashboard() {
     <div className="admin-view">
       <div className="admin-header">
         <div>
-          <h1 className="admin-title">⚙️ Administração</h1>
+          <h1 className="admin-title">Administração</h1>
           <p className="admin-sub">Painel do sistema</p>
         </div>
-        <button className="att-logout-btn" onClick={handleLogout}>🚪 Sair</button>
+        <button className="att-logout-btn" onClick={handleLogout}>Sair</button>
       </div>
 
       {/* Stats */}
@@ -209,13 +209,13 @@ export default function AdminDashboard() {
           className={`admin-tab ${tab === 'bakeries' ? 'admin-tab-active' : ''}`}
           onClick={() => setTab('bakeries')}
         >
-          🏪 Estabelecimentos {unclaimedCount > 0 && <span className="admin-tab-badge">{unclaimedCount}</span>}
+          Estabelecimentos {unclaimedCount > 0 && <span className="admin-tab-badge">{unclaimedCount}</span>}
         </button>
         <button
           className={`admin-tab ${tab === 'admins' ? 'admin-tab-active' : ''}`}
           onClick={() => setTab('admins')}
         >
-          👤 Administradores
+          Administradores
         </button>
       </div>
 
@@ -235,11 +235,11 @@ export default function AdminDashboard() {
                   <span className="admin-card-meta">{b.ownerEmail}</span>
                   <div className="admin-card-tags">
                     {b.unclaimed
-                      ? <span className="admin-tag admin-tag-orange">⏳ Aguardando dono</span>
-                      : <span className="admin-tag admin-tag-green">✅ Ativo</span>
+                      ? <span className="admin-tag admin-tag-orange">Aguardando dono</span>
+                      : <span className="admin-tag admin-tag-green">Ativo</span>
                     }
-                    <span className="admin-tag">🎫 {b.waiting} na fila</span>
-                    {b.serving != null && <span className="admin-tag admin-tag-green">🔔 #{b.serving}</span>}
+                    <span className="admin-tag">{b.waiting} na fila</span>
+                    {b.serving != null && <span className="admin-tag admin-tag-green">Atendendo #{b.serving}</span>}
                     <span className="admin-tag admin-tag-muted">desde {fmtDate(b.createdAt)}</span>
                   </div>
                 </div>
@@ -251,10 +251,10 @@ export default function AdminDashboard() {
                       disabled={inviteSent[b.id] === 'sending'}
                     >
                       {inviteSent[b.id] === 'sent'
-                        ? '✅ Enviado!'
+                        ? 'Enviado!'
                         : inviteSent[b.id] === 'sending'
-                        ? '⏳...'
-                        : '✉️ Enviar convite'}
+                        ? 'Enviando...'
+                        : 'Enviar convite'}
                     </button>
                   ) : (
                     <a className="admin-mini-btn" href={`/fila/${b.id}`} target="_blank" rel="noopener noreferrer">
@@ -285,7 +285,7 @@ export default function AdminDashboard() {
                 <div className="admin-card-main">
                   <span className="admin-card-name">{a.email}</span>
                   <span className="admin-card-meta">
-                    {a.bakeryName ? `🏪 ${a.bakeryName}` : 'sem estabelecimento'}
+                    {a.bakeryName ?? 'sem estabelecimento'}
                   </span>
                   <span className="admin-card-uid">{a.uid}</span>
                 </div>
@@ -342,7 +342,7 @@ export default function AdminDashboard() {
                 onClick={handleCreateBakery}
                 disabled={newBusy || !newName.trim() || !newEmail.trim()}
               >
-                {newBusy ? '⏳ Criando...' : '🏪 Criar estabelecimento'}
+                {newBusy ? 'Criando...' : 'Criar estabelecimento'}
               </button>
               <button className="btn btn-ghost" onClick={() => setShowNew(false)} disabled={newBusy}>
                 Cancelar
@@ -377,7 +377,7 @@ export default function AdminDashboard() {
                 onClick={handleRename}
                 disabled={renameBusy || !renameValue.trim()}
               >
-                {renameBusy ? '⏳ Salvando...' : '💾 Salvar'}
+                {renameBusy ? 'Salvando...' : 'Salvar'}
               </button>
               <button className="btn btn-ghost" onClick={() => setRenameModal(null)} disabled={renameBusy}>
                 Cancelar

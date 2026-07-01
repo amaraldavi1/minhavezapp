@@ -31,7 +31,6 @@ export default function Onboarding({ user, onCreated }) {
   return (
     <div className="login-view">
       <div className="login-card">
-        <span className="login-icon">🏪</span>
         <h1 className="login-title">Seu estabelecimento</h1>
         <p className="login-subtitle">
           Vamos configurar! Como se chama o seu estabelecimento?
@@ -57,7 +56,7 @@ export default function Onboarding({ user, onCreated }) {
             className="btn btn-primary w-full"
             disabled={busy || !name.trim()}
           >
-            {busy ? '⏳ Criando...' : '🎉 Criar minha fila'}
+            {busy ? 'Criando...' : 'Criar minha fila'}
           </button>
         </form>
       </div>

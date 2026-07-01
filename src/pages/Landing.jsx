@@ -1,10 +1,22 @@
 import { useNavigate } from 'react-router-dom'
 import BrandLogo from '../components/BrandLogo'
 
-const FEATURES = [
-  { icon: '📱', title: 'Entrada por QR Code', desc: 'O cliente escaneia e entra na fila pelo próprio celular.' },
-  { icon: '⚡', title: 'Tempo real', desc: 'Senhas e chamadas atualizam na hora, sem recarregar.' },
-  { icon: '📺', title: 'Painel de senhas', desc: 'Exiba a senha atual em qualquer TV ou monitor.' },
+const STEPS = [
+  {
+    num: '01',
+    title: 'QR Code no balcão',
+    desc: 'O cliente escaneia com o celular e entra na fila — sem papel, sem senha física.',
+  },
+  {
+    num: '02',
+    title: 'Acompanha pelo celular',
+    desc: 'Vê a posição em tempo real e aguarda onde quiser, sem ficar em pé.',
+  },
+  {
+    num: '03',
+    title: 'Você chama, eles aparecem',
+    desc: 'Um toque chama o próximo. O cliente recebe aviso e vai ao balcão.',
+  },
 ]
 
 export default function Landing() {
@@ -13,44 +25,58 @@ export default function Landing() {
   return (
     <div className="landing">
       <div className="landing-hero">
-        <BrandLogo size={76} className="landing-logo-mark" />
-        <h1 className="landing-title">Minha Vez</h1>
+        <BrandLogo size={52} className="landing-logo-mark" />
+        <span className="landing-eyebrow">Gestão de filas digitais</span>
+        <h1 className="landing-title">Fila digital<br />para o seu negócio.</h1>
         <p className="landing-tagline">
-          Gestão de filas digitais para o seu negócio.<br />
-          Sem senha de papel, sem aglomeração.
+          Seus clientes entram na fila pelo celular.<br />
+          Você chama. Eles aparecem.
         </p>
+
+        <div className="landing-ticket-board">
+          <div className="landing-ticket-eyebrow">
+            <span className="landing-ticket-live-dot" />
+            Atendendo agora
+          </div>
+          <div className="landing-ticket-number">042</div>
+          <div className="landing-ticket-meta">
+            <div>
+              <span className="landing-ticket-meta-item">Na fila</span>
+              <span className="landing-ticket-meta-value">5</span>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <span className="landing-ticket-meta-item">Próximo</span>
+              <span className="landing-ticket-meta-value">#043</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="landing-cta">
         <button
-          className="btn btn-primary btn-huge"
+          className="btn btn-primary btn-huge w-full"
           onClick={() => navigate('/painel/login')}
         >
           Acessar painel →
         </button>
-        <p className="landing-owner-hint">
-          Para gestores e atendentes do estabelecimento
-        </p>
+        <p className="landing-owner-hint">Para gestores e atendentes</p>
       </div>
 
-      <div className="landing-features">
-        {FEATURES.map((f) => (
-          <div key={f.title} className="landing-feature">
-            <span className="landing-feature-icon">{f.icon}</span>
+      <div className="landing-steps">
+        {STEPS.map((s) => (
+          <div key={s.num} className="landing-step">
+            <div className="landing-step-num">{s.num}</div>
             <div>
-              <span className="landing-feature-title">{f.title}</span>
-              <span className="landing-feature-desc">{f.desc}</span>
+              <span className="landing-step-title">{s.title}</span>
+              <span className="landing-step-desc">{s.desc}</span>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="landing-client-note">
-        <span className="landing-qr-icon">📷</span>
-        <p>
-          <strong>É cliente?</strong> Escaneie o QR Code exposto no
-          balcão do estabelecimento para entrar na fila.
-        </p>
+      <div className="landing-client-hint">
+        <strong>É cliente?</strong> Escaneie o QR Code exposto no balcão do
+        estabelecimento para entrar na fila.
       </div>
     </div>
   )

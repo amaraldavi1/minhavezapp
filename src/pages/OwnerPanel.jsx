@@ -144,7 +144,6 @@ export default function OwnerPanel() {
       return (
         <div className="login-view">
           <div className="login-card">
-            <span className="login-icon">🎉</span>
             <h1 className="login-title">Bem-vindo!</h1>
             <p className="login-subtitle">
               Você foi convidado para gerenciar o estabelecimento<br />
@@ -156,7 +155,7 @@ export default function OwnerPanel() {
               onClick={handleClaimInvite}
               disabled={claiming}
             >
-              {claiming ? '⏳ Configurando...' : '✅ Confirmar acesso'}
+              {claiming ? 'Configurando...' : 'Confirmar acesso'}
             </button>
             <button className="btn btn-ghost" onClick={handleLogoutRestricted}>
               Sair
@@ -331,32 +330,31 @@ export default function OwnerPanel() {
           <div className="att-header-actions">
             {isSuper && (
               <button className="att-logout-btn" onClick={() => navigate('/admin')} title="Administração">
-                ⚙️ Admin
+                Admin
               </button>
             )}
             <button className="att-logout-btn" onClick={handleLogout} title="Sair">
-              🚪 Sair
+              Sair
             </button>
           </div>
         </div>
 
         {/* Share QR + logo + menu link */}
         <button className="att-share-btn" onClick={() => setShowShare(true)}>
-          📲 Mostrar QR Code para os clientes
+          Compartilhar QR Code da fila
         </button>
         <div className="att-tool-row">
           <button className="att-tool-btn" onClick={openLogoModal}>
-            {logoUrl ? '🖼️ Editar logomarca' : '🖼️ Adicionar logomarca'}
+            {logoUrl ? 'Editar logomarca' : 'Adicionar logomarca'}
           </button>
           <button className="att-tool-btn" onClick={openMenuModal}>
-            {menuUrl ? '🔗 Editar link' : '➕ Adicionar link'}
+            {menuUrl ? 'Editar link externo' : 'Adicionar link externo'}
           </button>
         </div>
 
         {/* Manual ticket generation */}
         <button className="att-generate-btn" onClick={openGenerateModal}>
-          <span>🎫</span>
-          <span>Gerar senha para cliente sem celular</span>
+          Gerar senha manual
         </button>
 
         {/* Currently serving */}
@@ -417,17 +415,11 @@ export default function OwnerPanel() {
             onClick={handleCallNext}
             disabled={!hasNext || busy}
           >
-            <span className="att-fab-icon">📢</span>
-            <span className="att-fab-label">
-              {busy ? 'Aguarde...' : hasNext ? 'Chamar Próximo' : 'Fila vazia'}
-            </span>
+            {busy ? 'Aguarde...' : hasNext ? 'Chamar próximo' : 'Fila vazia'}
           </button>
         ) : (
           <button className="att-fab att-fab-green" onClick={handleMarkServed} disabled={busy}>
-            <span className="att-fab-icon">✅</span>
-            <span className="att-fab-label">
-              {busy ? 'Aguarde...' : 'Marcar como Atendido'}
-            </span>
+            {busy ? 'Aguarde...' : 'Marcar como atendido'}
           </button>
         )}
       </div>
@@ -444,7 +436,7 @@ export default function OwnerPanel() {
             <code className="share-link">{clientLink}</code>
             <div className="share-actions">
               <button className="btn btn-primary w-full" onClick={copyLink}>
-                📋 Copiar link da fila
+                Copiar link da fila
               </button>
               <a
                 className="btn btn-outline w-full"
@@ -453,7 +445,7 @@ export default function OwnerPanel() {
                 rel="noopener noreferrer"
                 style={{ textDecoration: 'none' }}
               >
-                📺 Abrir painel de senhas
+                Abrir painel de senhas
               </a>
               <button className="btn btn-ghost" onClick={() => setShowShare(false)}>
                 Fechar
@@ -489,7 +481,7 @@ export default function OwnerPanel() {
                 onClick={handleGenerateTicket}
                 disabled={generating}
               >
-                {generating ? '⏳ Gerando...' : '🎫 Gerar senha'}
+                {generating ? 'Gerando...' : 'Gerar senha'}
               </button>
               <button className="btn btn-ghost" onClick={() => setShowGenerateModal(false)}>
                 Cancelar
@@ -519,7 +511,7 @@ export default function OwnerPanel() {
                 className="btn btn-primary w-full"
                 onClick={() => { setGeneratedTicket(null); openGenerateModal() }}
               >
-                🎫 Gerar outra senha
+                Gerar outra senha
               </button>
               <button className="btn btn-ghost" onClick={() => setGeneratedTicket(null)}>
                 Fechar
@@ -550,7 +542,7 @@ export default function OwnerPanel() {
             )}
 
             <label className="logo-file-label">
-              {logoPreview ? '🔄 Trocar imagem' : logoUrl ? '🔄 Substituir logomarca' : '📁 Escolher imagem'}
+              {logoPreview ? 'Trocar imagem' : logoUrl ? 'Substituir logomarca' : 'Escolher imagem'}
               <input
                 type="file"
                 accept="image/*"
@@ -566,12 +558,12 @@ export default function OwnerPanel() {
                   onClick={handleLogoUpload}
                   disabled={logoUploading}
                 >
-                  {logoUploading ? '⏳ Enviando...' : '☁️ Salvar logomarca'}
+                  {logoUploading ? 'Enviando...' : 'Salvar logomarca'}
                 </button>
               )}
               {logoUrl && !logoFile && (
                 <button className="btn btn-danger-ghost" onClick={handleLogoRemove}>
-                  🗑️ Remover logomarca
+                  Remover logomarca
                 </button>
               )}
               <button className="btn btn-ghost" onClick={() => setShowLogo(false)}>
@@ -607,7 +599,7 @@ export default function OwnerPanel() {
             </div>
             <div className="share-actions">
               <button className="btn btn-primary w-full" onClick={saveMenu}>
-                💾 Salvar
+                Salvar
               </button>
               {menuUrl && (
                 <button

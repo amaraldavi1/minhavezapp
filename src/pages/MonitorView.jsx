@@ -131,7 +131,6 @@ export default function MonitorView() {
             <QRCodeSVG value={clientLink} size={240} level="M" includeMargin />
           </div>
           <span className="monitor-qr-hint">
-            <span className="monitor-qr-hint-icon">📷</span>
             Aponte a câmera do celular
           </span>
         </aside>

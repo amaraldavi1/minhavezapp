@@ -285,7 +285,7 @@ export default function ClientView() {
         onClick={handleJoin}
         disabled={joining}
       >
-        {joining ? '⏳ Aguarde...' : '🎫 Entrar na Fila'}
+        {joining ? 'Aguarde...' : 'Entrar na fila'}
       </button>
 
       {menuUrl && (

@@ -172,7 +172,7 @@ export default function OwnerLogin() {
                 className="btn btn-primary w-full"
                 disabled={submitting || !email}
               >
-                {submitting ? '⏳ Enviando...' : '✉️ Enviar link de acesso'}
+                {submitting ? 'Enviando...' : 'Enviar link de acesso'}
               </button>
             </form>
           </>
