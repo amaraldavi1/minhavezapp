@@ -69,25 +69,44 @@ export default function MonitorView() {
   const nextTickets = sortedWaiting.slice(0, 6)
   const clientLink = `${window.location.origin}/fila/${bakeryId}`
 
+  const isServing = currentlyServing !== null
+
   return (
     <div className="monitor-view">
+      <div className="monitor-ambient" aria-hidden="true" />
 
       {/* Header */}
       <header className="monitor-header">
         <div className="monitor-header-left">
-          {logoUrl && <img src={logoUrl} alt="Logo" className="monitor-logo" />}
-          <span className="monitor-bakery-name">{bakeryName}</span>
+          {logoUrl
+            ? <img src={logoUrl} alt="Logo" className="monitor-logo" />
+            : <span className="monitor-logo monitor-logo-fallback">🍞</span>
+          }
+          <div className="monitor-header-titles">
+            <span className="monitor-bakery-name">{bakeryName}</span>
+            <span className="monitor-bakery-sub">Painel de senhas</span>
+          </div>
         </div>
-        <Clock />
+        <div className="monitor-header-right">
+          <span className="monitor-live">
+            <span className="monitor-live-dot" />
+            AO VIVO
+          </span>
+          <Clock />
+        </div>
       </header>
 
       {/* Main — currently serving + QR to join */}
       <main className="monitor-main">
         <div className="monitor-serving-block">
-          <p className="monitor-serving-label">ATENDENDO AGORA</p>
-          <div className={`monitor-serving-card ${flash ? 'monitor-flash' : ''}`}>
-            {currentlyServing !== null ? (
+          <p className="monitor-serving-label">
+            <span className="monitor-serving-label-dot" />
+            ATENDENDO AGORA
+          </p>
+          <div className={`monitor-serving-card ${isServing ? 'monitor-serving-on' : ''} ${flash ? 'monitor-flash' : ''}`}>
+            {isServing ? (
               <>
+                <span className="monitor-serving-hash">Nº</span>
                 <span className="monitor-serving-number">{currentlyServing}</span>
                 {servingName && (
                   <span className="monitor-serving-name">{servingName}</span>
@@ -97,7 +116,7 @@ export default function MonitorView() {
               <span className="monitor-serving-idle">—</span>
             )}
           </div>
-          {!currentlyServing && (
+          {!isServing && (
             <p className="monitor-idle-hint">
               {sortedWaiting.length === 0 ? 'Nenhum cliente na fila' : 'Aguardando chamada'}
             </p>
@@ -105,25 +124,36 @@ export default function MonitorView() {
         </div>
 
         <aside className="monitor-qr-panel">
+          <span className="monitor-qr-badge">ENTRE NA FILA</span>
           <span className="monitor-qr-title">Retire sua senha aqui</span>
           <div className="monitor-qr-box">
-            <QRCodeSVG value={clientLink} size={220} level="M" includeMargin />
+            <QRCodeSVG value={clientLink} size={240} level="M" includeMargin />
           </div>
-          <span className="monitor-qr-hint">📷 Aponte a câmera do celular</span>
+          <span className="monitor-qr-hint">
+            <span className="monitor-qr-hint-icon">📷</span>
+            Aponte a câmera do celular
+          </span>
         </aside>
       </main>
 
       {/* Footer — queue */}
       <footer className="monitor-footer">
         <span className="monitor-footer-label">
-          PRÓXIMOS — {sortedWaiting.length} {sortedWaiting.length === 1 ? 'pessoa' : 'pessoas'} aguardando
+          Próximos na fila
+          <span className="monitor-footer-count">
+            {sortedWaiting.length} {sortedWaiting.length === 1 ? 'aguardando' : 'aguardando'}
+          </span>
         </span>
         <div className="monitor-next-row">
           {nextTickets.length === 0 ? (
-            <span className="monitor-next-empty">Fila vazia</span>
+            <span className="monitor-next-empty">Nenhuma senha aguardando</span>
           ) : (
             nextTickets.map((t, i) => (
               <div key={t.number} className={`monitor-next-ticket ${i === 0 ? 'monitor-next-first' : ''}`}>
+                {i === 0
+                  ? <span className="monitor-next-tag">PRÓXIMO</span>
+                  : <span className="monitor-next-pos">{i + 1}º</span>
+                }
                 <span className="monitor-next-num">{t.number}</span>
                 {t.name && <span className="monitor-next-name">{t.name}</span>}
               </div>
