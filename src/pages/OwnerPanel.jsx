@@ -20,6 +20,25 @@ import {
 } from '../lib/queue'
 import { uploadLogo, removeLogo } from '../lib/logo'
 
+/** Turns a logo upload/remove error into a clear, actionable message. */
+function logoErrorMessage(e) {
+  const code = e?.code ?? ''
+  if (code === 'storage/unauthorized') {
+    return 'Permissão negada pelo Storage. As regras de segurança do Storage ' +
+      'ainda não foram publicadas. Execute "firebase deploy --only storage".'
+  }
+  if (code === 'storage/retry-limit-exceeded' || code === 'storage/canceled') {
+    return 'Falha de conexão ao enviar a imagem. Verifique sua internet e tente novamente.'
+  }
+  if (code === 'storage/unknown') {
+    return 'Não foi possível acessar o Storage. Confirme que o Firebase Storage ' +
+      'está ativado no projeto.'
+  }
+  // Our own validation errors (formato/tamanho) carry a message and no code.
+  if (e?.message && !code) return e.message
+  return `Não foi possível concluir a operação${code ? ` (${code})` : ''}.`
+}
+
 export default function OwnerPanel() {
   const { user } = useAuth()
   const { checking: superChecking, isSuper } = useSuperadmin()
@@ -228,7 +247,7 @@ export default function OwnerPanel() {
       setLogoFile(null)
       setLogoPreview(null)
     } catch (e) {
-      alert(`Erro ao enviar a logomarca (${e?.code ?? e?.message}).`)
+      alert(logoErrorMessage(e))
     } finally {
       setLogoUploading(false)
     }
@@ -240,7 +259,7 @@ export default function OwnerPanel() {
       await removeLogo(bakeryId, user.uid)
       setShowLogo(false)
     } catch (e) {
-      alert(`Erro ao remover a logomarca (${e?.code ?? e?.message}).`)
+      alert(logoErrorMessage(e))
     }
   }
 
