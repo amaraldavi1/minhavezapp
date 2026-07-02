@@ -6,29 +6,8 @@ import { ensureAnonAuth } from '../lib/anonClient'
 import { normalizeQueue, sortWaiting, joinQueue, leaveQueue } from '../lib/queue'
 import BrandLogo from '../components/BrandLogo'
 
-const DB_URL = import.meta.env.VITE_FIREBASE_DATABASE_URL
-
 function storageKey(bakeryId) {
   return `minhavez_ticket_${bakeryId}`
-}
-
-async function startBackgroundWatch(bakeryId, ticketNumber) {
-  if (!('serviceWorker' in navigator) || !('Notification' in window)) return
-  try {
-    let perm = Notification.permission
-    if (perm === 'default') perm = await Notification.requestPermission()
-    if (perm !== 'granted') return
-    await navigator.serviceWorker.register('/sw.js', { scope: '/' })
-    const reg = await navigator.serviceWorker.ready
-    reg.active?.postMessage({ type: 'WATCH_TICKET', dbUrl: DB_URL, bakeryId, ticketNumber })
-  } catch (_) {}
-}
-
-function stopBackgroundWatch() {
-  if (!('serviceWorker' in navigator)) return
-  navigator.serviceWorker.ready
-    .then((reg) => reg.active?.postMessage({ type: 'CANCEL_WATCH' }))
-    .catch(() => {})
 }
 
 function playChime() {
@@ -64,6 +43,17 @@ export default function ClientView() {
   })
   const [joining, setJoining] = useState(false)
   const prevServing = useRef(null)
+  const swRegRef = useRef(null)
+
+  // Register a minimal service worker so we can show a notification via
+  // registration.showNotification() (required on Android/Chrome) and focus
+  // the tab when it's clicked. No background logic lives in the worker.
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .then((reg) => { swRegRef.current = reg })
+      .catch(() => {})
+  }, [])
 
   // Sign the visitor in anonymously before any read/write.
   useEffect(() => {
@@ -96,9 +86,32 @@ export default function ClientView() {
     if (serving === myTicket && prevServing.current !== myTicket) {
       playChime()
       if (navigator.vibrate) navigator.vibrate([400, 150, 400, 150, 600])
+      // If the tab is backgrounded (app switched or screen locked), also fire a
+      // native notification. Works while the page stays open; a fully closed
+      // tab would need Web Push + FCM (a backend), which we don't have yet.
+      if (
+        document.hidden &&
+        'Notification' in window &&
+        Notification.permission === 'granted'
+      ) {
+        const opts = {
+          body: `Senha #${myTicket} — Dirija-se ao balcão agora.`,
+          icon: '/favicon.ico',
+          badge: '/favicon.ico',
+          vibrate: [400, 150, 400, 150, 600],
+          tag: 'queue-turn',
+          requireInteraction: true,
+          data: { bakeryId, ticketNumber: myTicket },
+        }
+        try {
+          const reg = swRegRef.current
+          if (reg?.showNotification) reg.showNotification('É a sua vez!', opts)
+          else new Notification('É a sua vez!', opts) // desktop fallback
+        } catch (_) {}
+      }
     }
     prevServing.current = serving
-  }, [queue, myTicket])
+  }, [queue, myTicket, bakeryId])
 
   // Clear ticket if the queue was reset.
   useEffect(() => {
@@ -110,16 +123,13 @@ export default function ClientView() {
     }
   }, [queue, myTicket, bakeryId])
 
-  // Background notification: keep a SW SSE connection alive so the user
-  // is notified even when the tab is closed or the phone screen is off.
-  useEffect(() => {
-    if (!authReady || myTicket === null) return
-    startBackgroundWatch(bakeryId, myTicket)
-    return () => stopBackgroundWatch()
-  }, [authReady, myTicket, bakeryId])
-
   async function handleJoin() {
     setJoining(true)
+    // Ask for notification permission on this user gesture (best practice) —
+    // it powers the "your turn" alert when the tab is in the background.
+    if ('Notification' in window && Notification.permission === 'default') {
+      try { await Notification.requestPermission() } catch (_) {}
+    }
     try {
       const ticketNumber = await joinQueue(bakeryId)
       setMyTicket(ticketNumber)
