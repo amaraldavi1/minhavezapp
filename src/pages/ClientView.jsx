@@ -5,6 +5,7 @@ import { db } from '../firebase'
 import { ensureAnonAuth } from '../lib/anonClient'
 import { normalizeQueue, sortWaiting, joinQueue, leaveQueue } from '../lib/queue'
 import BrandLogo from '../components/BrandLogo'
+import PoweredBy from '../components/PoweredBy'
 
 function storageKey(bakeryId) {
   return `minhavez_ticket_${bakeryId}`
@@ -219,6 +220,7 @@ export default function ClientView() {
   const currentlyServing = queue.state?.currentlyServing ?? null
   const bakeryName = queue.info?.name ?? 'Atendimento'
   const logoUrl = queue.info?.logoUrl ?? null
+  const isFreePlan = (queue.info?.plan ?? 'free') !== 'pro'
   const menuUrlRaw = queue.info?.menuUrl ?? null
   const menuUrl = menuUrlRaw && /^https?:\/\/.+/.test(menuUrlRaw) ? menuUrlRaw : null
   const isMyTurn = myTicket !== null && currentlyServing === myTicket
@@ -283,6 +285,7 @@ export default function ClientView() {
         <button className="btn btn-danger-ghost" onClick={handleLeave}>
           Sair da fila
         </button>
+        {isFreePlan && <PoweredBy variant="light" />}
       </div>
     )
   }
@@ -337,6 +340,8 @@ export default function ClientView() {
           📄 Mais informações
         </a>
       )}
+
+      {isFreePlan && <PoweredBy variant="light" />}
     </div>
   )
 }

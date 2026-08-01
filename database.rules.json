@@ -21,6 +21,7 @@
           "ownerUid":   { ".validate": "newData.isString()" },
           "ownerEmail": { ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)" },
           "createdAt":  { ".validate": "newData.isNumber()" },
+          "plan":       { ".validate": "(newData.val() === 'free' || newData.val() === 'pro') && (newData.val() === 'free' || root.child('superadmins').child(auth.uid).exists())" },
           "menuUrl":    { ".validate": "newData.isString() && newData.val().length <= 500 && newData.val().matches(/^https?:\\/\\/.+/)" },
           "logoUrl":    { ".validate": "newData.isString() && newData.val().length <= 2000" },
           "$other":     { ".validate": false }

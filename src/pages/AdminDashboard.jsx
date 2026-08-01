@@ -7,6 +7,7 @@ import {
   createBakeryAdmin,
   sendOwnerInvite,
   renameBakery,
+  setPlan,
   deleteBakery,
   deleteAdmin,
 } from '../lib/admin'
@@ -94,6 +95,7 @@ export default function AdminDashboard() {
       : (b?.info?.ownerUid && data.users?.[b.info.ownerUid]?.email) || '—',
     ownerEmailRaw: b?.info?.ownerEmail ?? null,
     unclaimed: b?.info?.ownerUid === 'unclaimed',
+    plan: b?.info?.plan === 'pro' ? 'pro' : 'free',
     createdAt: b?.info?.createdAt,
     serving: b?.state?.currentlyServing ?? null,
     waiting: Object.keys(b?.waiting ?? {}).length,
@@ -108,6 +110,18 @@ export default function AdminDashboard() {
 
   const totalWaiting = bakeries.reduce((sum, b) => sum + b.waiting, 0)
   const unclaimedCount = bakeries.filter((b) => b.unclaimed).length
+  const proCount = bakeries.filter((b) => b.plan === 'pro').length
+
+  async function handleTogglePlan(b) {
+    const next = b.plan === 'pro' ? 'free' : 'pro'
+    const verb = next === 'pro' ? 'ativar o plano Pro' : 'voltar ao plano Free'
+    if (!confirm(`Deseja ${verb} para "${b.name}"?`)) return
+    try {
+      await setPlan(b.id, next)
+    } catch (e) {
+      alert(`Erro ao alterar o plano (${e?.code ?? e?.message}).`)
+    }
+  }
 
   async function handleCreateBakery() {
     if (!newName.trim() || !newEmail.trim() || newBusy) return
@@ -198,6 +212,10 @@ export default function AdminDashboard() {
           <span className="admin-stat-label">admins ativos</span>
         </div>
         <div className="admin-stat">
+          <span className="admin-stat-value">{proCount}</span>
+          <span className="admin-stat-label">plano Pro</span>
+        </div>
+        <div className="admin-stat">
           <span className="admin-stat-value">{totalWaiting}</span>
           <span className="admin-stat-label">na fila agora</span>
         </div>
@@ -238,6 +256,10 @@ export default function AdminDashboard() {
                       ? <span className="admin-tag admin-tag-orange">Aguardando dono</span>
                       : <span className="admin-tag admin-tag-green">Ativo</span>
                     }
+                    {b.plan === 'pro'
+                      ? <span className="admin-tag admin-tag-pro">Pro</span>
+                      : <span className="admin-tag admin-tag-muted">Free</span>
+                    }
                     <span className="admin-tag">{b.waiting} na fila</span>
                     {b.serving != null && <span className="admin-tag admin-tag-green">Atendendo #{b.serving}</span>}
                     <span className="admin-tag admin-tag-muted">desde {fmtDate(b.createdAt)}</span>
@@ -263,6 +285,12 @@ export default function AdminDashboard() {
                   )}
                   <button className="admin-mini-btn" onClick={() => openRenameModal(b)}>
                     Renomear
+                  </button>
+                  <button
+                    className={`admin-mini-btn ${b.plan === 'pro' ? '' : 'admin-mini-pro'}`}
+                    onClick={() => handleTogglePlan(b)}
+                  >
+                    {b.plan === 'pro' ? 'Voltar a Free' : 'Ativar Pro'}
                   </button>
                   <button className="admin-mini-btn admin-mini-danger" onClick={() => handleDeleteBakery(b)}>
                     Excluir

@@ -4,10 +4,10 @@ import {
   sendSignInLinkToEmail,
   isSignInWithEmailLink,
   signInWithEmailLink,
+  signInWithPopup,
 } from 'firebase/auth'
-import { auth } from '../firebase'
+import { auth, googleProvider } from '../firebase'
 import { useAuth } from '../auth/AuthContext'
-import { isAllowedEmail } from '../lib/invites'
 import BrandLogo from '../components/BrandLogo'
 
 const EMAIL_KEY = 'minhavez_email_for_signin'
@@ -20,6 +20,7 @@ export default function OwnerLogin() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [completing, setCompleting] = useState(false)
+  const [googleBusy, setGoogleBusy] = useState(false)
 
   // If we arrived back from the email link, finish the sign-in.
   useEffect(() => {
@@ -58,6 +59,30 @@ export default function OwnerLogin() {
     }
   }, [user, loading, navigate])
 
+  async function handleGoogle() {
+    if (googleBusy) return
+    setError('')
+    setGoogleBusy(true)
+    try {
+      await signInWithPopup(auth, googleProvider)
+      navigate('/painel', { replace: true })
+    } catch (err) {
+      const code = err?.code ?? ''
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        // User dismissed the popup — no error to show.
+      } else if (code === 'auth/operation-not-allowed') {
+        setError('Login com Google não está habilitado. Ative em ' +
+          'Authentication → Sign-in method → Google.')
+      } else if (code === 'auth/unauthorized-domain') {
+        setError(`O domínio "${window.location.hostname}" não está autorizado. ` +
+          'Adicione-o em Authentication → Settings → Domínios autorizados.')
+      } else {
+        setError(`Não foi possível entrar com Google${code ? ` (${code})` : ''}.`)
+      }
+      setGoogleBusy(false)
+    }
+  }
+
   async function handleSend(e) {
     e.preventDefault()
     if (!email || submitting) return
@@ -65,16 +90,6 @@ export default function OwnerLogin() {
     setError('')
     const address = email.trim()
     try {
-      const allowed = await isAllowedEmail(address)
-      if (!allowed) {
-        setError(
-          'Este e-mail não está autorizado a acessar o painel. ' +
-          'O cadastro de estabelecimentos é feito pelo administrador do sistema. ' +
-          'Entre em contato para solicitar acesso.',
-        )
-        setSubmitting(false)
-        return
-      }
       await sendSignInLinkToEmail(auth, address, {
         url: window.location.origin + '/painel/login',
         handleCodeInApp: true,
@@ -127,7 +142,7 @@ export default function OwnerLogin() {
     <div className="login-view">
       <div className="login-card">
         <BrandLogo size={56} />
-        <h1 className="login-title">Acessar painel</h1>
+        <h1 className="login-title">Entrar ou criar conta</h1>
 
         {sent ? (
           <>
@@ -149,8 +164,26 @@ export default function OwnerLogin() {
         ) : (
           <>
             <p className="login-subtitle">
-              Digite seu e-mail e enviaremos um link mágico de acesso. Sem senha.
+              Crie sua conta grátis ou entre. Sem cartão, sem senha.
             </p>
+
+            <button
+              type="button"
+              className="btn btn-google w-full"
+              onClick={handleGoogle}
+              disabled={googleBusy}
+            >
+              <svg className="google-icon" viewBox="0 0 18 18" width="18" height="18" aria-hidden="true">
+                <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.71-1.57 2.68-3.89 2.68-6.62z"/>
+                <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/>
+                <path fill="#FBBC05" d="M3.97 10.72a5.41 5.41 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z"/>
+                <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/>
+              </svg>
+              {googleBusy ? 'Conectando...' : 'Continuar com Google'}
+            </button>
+
+            <div className="login-divider"><span>ou com e-mail</span></div>
+
             <form onSubmit={handleSend} className="login-form">
               <div className="input-group">
                 <label htmlFor="email" className="input-label">E-mail</label>

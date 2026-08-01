@@ -2181,3 +2181,142 @@ body {
   color: var(--green-dark);
   margin-top: 0.35rem;
 }
+
+/* ===== Auth: Google button + divider (self-signup) ===== */
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: var(--white);
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  font-weight: 700;
+}
+.btn-google:hover:not(:disabled) {
+  background: var(--gray-light);
+}
+.btn-google:disabled { opacity: 0.6; cursor: default; }
+.google-icon { flex-shrink: 0; }
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin: 1.1rem 0 0.25rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ===== "Powered by Minha Vez" free-plan badge ===== */
+.powered-by {
+  display: inline-block;
+  margin-top: 1.5rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  opacity: 0.75;
+  transition: opacity 0.15s;
+}
+.powered-by:hover { opacity: 1; }
+.powered-by strong { font-weight: 800; }
+.powered-by-light { color: var(--gray); }
+.powered-by-light strong { color: var(--primary); }
+.powered-by-dark {
+  position: absolute;
+  bottom: 0.9rem;
+  right: 1.4rem;
+  margin-top: 0;
+  color: rgba(255, 255, 255, 0.55);
+}
+.powered-by-dark strong { color: rgba(255, 255, 255, 0.9); }
+
+/* ===== Owner panel: plan chip + upgrade modal ===== */
+.att-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+}
+.att-plan-chip {
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.3rem 0.7rem;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.att-plan-pro {
+  background: linear-gradient(135deg, #7C3AED, #4F46E5);
+  color: var(--white);
+  cursor: default;
+}
+.att-plan-free {
+  background: var(--primary-lighter);
+  color: var(--primary-dark);
+  border: 1.5px solid var(--primary-light);
+}
+.att-plan-free:hover { background: var(--primary-light); }
+
+.upgrade-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #7C3AED, #4F46E5);
+  color: var(--white);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.75rem;
+  border-radius: 100px;
+  margin-bottom: 0.5rem;
+}
+.upgrade-list {
+  list-style: none;
+  text-align: left;
+  width: 100%;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.upgrade-list li {
+  position: relative;
+  padding-left: 1.75rem;
+  font-size: 0.92rem;
+  color: var(--text);
+  line-height: 1.35;
+}
+.upgrade-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  color: var(--green-dark);
+  font-weight: 900;
+}
+
+/* ===== Admin: plan tag + activate-Pro button ===== */
+.admin-tag-pro {
+  background: linear-gradient(135deg, #7C3AED, #4F46E5);
+  color: var(--white);
+}
+.admin-mini-pro {
+  background: var(--primary-lighter);
+  color: var(--primary-dark);
+}
+.admin-mini-pro:hover { background: var(--primary-light); }

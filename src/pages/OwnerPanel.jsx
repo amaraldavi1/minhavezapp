@@ -19,6 +19,20 @@ import {
   setMenuUrl as setMenuUrlOp,
 } from '../lib/queue'
 import { uploadLogo, removeLogo } from '../lib/logo'
+import Onboarding from './Onboarding'
+
+// Where the "upgrade to Pro" button sends the owner. Configure a Stripe
+// Payment Link / PIX checkout in VITE_UPGRADE_URL; without it we fall back to
+// a contact e-mail so the superadmin can activate Pro manually.
+const UPGRADE_URL = import.meta.env.VITE_UPGRADE_URL || ''
+const SUPPORT_EMAIL = import.meta.env.VITE_SUPPORT_EMAIL || 'amaraldavi1@gmail.com'
+
+const PRO_BENEFITS = [
+  'Sem o selo "Powered by Minha Vez" nas telas do cliente e no painel',
+  'Fila sem limite de senhas por dia',
+  'Logomarca própria em destaque',
+  'Suporte prioritário',
+]
 
 /** Turns a logo upload/remove error into a clear, actionable message. */
 function logoErrorMessage(e) {
@@ -54,6 +68,7 @@ export default function OwnerPanel() {
   const [logoFile, setLogoFile] = useState(null)
   const [logoPreview, setLogoPreview] = useState(null)
   const [logoUploading, setLogoUploading] = useState(false)
+  const [showUpgrade, setShowUpgrade] = useState(false)
   const [showGenerateModal, setShowGenerateModal] = useState(false)
   const [generateName, setGenerateName] = useState('')
   const [generatedTicket, setGeneratedTicket] = useState(null) // { number, name }
@@ -165,18 +180,13 @@ export default function OwnerPanel() {
       )
     }
 
+    // No bakery and no invite → let them create their own (self-service signup).
     return (
-      <div className="served-view">
-        <span className="served-icon">🔒</span>
-        <h2 className="served-title">Acesso restrito</h2>
-        <p className="served-message">
-          Este painel é exclusivo dos responsáveis pelos estabelecimentos cadastrados.
-          Entre em contato com o administrador do sistema para solicitar acesso.
-        </p>
-        <button className="btn btn-ghost" onClick={handleLogoutRestricted}>
-          ← Sair
-        </button>
-      </div>
+      <Onboarding
+        user={user}
+        onCreated={(id) => setBakeryId(id)}
+        onLogout={handleLogoutRestricted}
+      />
     )
   }
 
@@ -196,6 +206,7 @@ export default function OwnerPanel() {
   const totalWaiting = sortedWaiting.length
   const hasNext = totalWaiting > 0
   const bakeryName = queue.info?.name ?? 'Meu estabelecimento'
+  const isPro = queue.info?.plan === 'pro'
   const menuUrl = queue.info?.menuUrl ?? ''
   const logoUrl = queue.info?.logoUrl ?? null
   const clientLink = `${window.location.origin}/fila/${bakeryId}`
@@ -324,7 +335,17 @@ export default function OwnerPanel() {
             )}
             <div>
               <h1 className="att-title">{bakeryName}</h1>
-              <span className="att-badge">{totalWaiting} aguardando</span>
+              <div className="att-badge-row">
+                <span className="att-badge">{totalWaiting} aguardando</span>
+                {isPro
+                  ? <span className="att-plan-chip att-plan-pro">Pro</span>
+                  : (
+                    <button className="att-plan-chip att-plan-free" onClick={() => setShowUpgrade(true)}>
+                      Plano Free · Upgrade
+                    </button>
+                  )
+                }
+              </div>
             </div>
           </div>
           <div className="att-header-actions">
@@ -423,6 +444,43 @@ export default function OwnerPanel() {
           </button>
         )}
       </div>
+
+      {/* Upgrade to Pro */}
+      {showUpgrade && (
+        <div className="share-overlay" onClick={() => setShowUpgrade(false)}>
+          <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+            <span className="upgrade-badge">Plano Pro</span>
+            <h2 className="share-title">Leve sua fila para o próximo nível</h2>
+            <ul className="upgrade-list">
+              {PRO_BENEFITS.map((benefit) => (
+                <li key={benefit}>{benefit}</li>
+              ))}
+            </ul>
+            <div className="share-actions" style={{ marginTop: '1.25rem' }}>
+              {UPGRADE_URL ? (
+                <a
+                  className="btn btn-primary w-full"
+                  href={UPGRADE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Fazer upgrade agora
+                </a>
+              ) : (
+                <a
+                  className="btn btn-primary w-full"
+                  href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Quero o plano Pro — ' + bakeryName)}`}
+                >
+                  Quero assinar o Pro
+                </a>
+              )}
+              <button className="btn btn-ghost" onClick={() => setShowUpgrade(false)}>
+                Agora não
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Share overlay */}
       {showShare && (

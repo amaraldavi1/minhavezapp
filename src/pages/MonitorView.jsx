@@ -5,6 +5,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import { db } from '../firebase'
 import { normalizeQueue, sortWaiting } from '../lib/queue'
 import BrandLogo from '../components/BrandLogo'
+import PoweredBy from '../components/PoweredBy'
 
 function Clock() {
   const [time, setTime] = useState(() => new Date())
@@ -67,6 +68,7 @@ export default function MonitorView() {
   const servingName = queue.state?.servingName ?? null
   const bakeryName = queue.info?.name ?? 'Atendimento'
   const logoUrl = queue.info?.logoUrl ?? null
+  const isFreePlan = (queue.info?.plan ?? 'free') !== 'pro'
   const nextTickets = sortedWaiting.slice(0, 6)
   const clientLink = `${window.location.origin}/fila/${bakeryId}`
 
@@ -161,6 +163,8 @@ export default function MonitorView() {
           )}
         </div>
       </footer>
+
+      {isFreePlan && <PoweredBy variant="dark" />}
     </div>
   )
 }

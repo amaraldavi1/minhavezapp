@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createBakery } from '../lib/queue'
 
-export default function Onboarding({ user, onCreated }) {
+export default function Onboarding({ user, onCreated, onLogout }) {
   const [name, setName] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -33,7 +33,8 @@ export default function Onboarding({ user, onCreated }) {
       <div className="login-card">
         <h1 className="login-title">Seu estabelecimento</h1>
         <p className="login-subtitle">
-          Vamos configurar! Como se chama o seu estabelecimento?
+          Falta pouco! Como se chama o seu estabelecimento?
+          Você começa no plano gratuito.
         </p>
 
         <form onSubmit={handleSubmit} className="login-form">
@@ -59,6 +60,12 @@ export default function Onboarding({ user, onCreated }) {
             {busy ? 'Criando...' : 'Criar minha fila'}
           </button>
         </form>
+
+        {onLogout && (
+          <button className="btn btn-ghost" onClick={onLogout}>
+            Sair
+          </button>
+        )}
       </div>
     </div>
   )

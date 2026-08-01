@@ -52,6 +52,7 @@ export async function createBakeryAdmin(name, ownerEmail) {
       name: name.trim(),
       ownerUid: 'unclaimed',
       ownerEmail: email,
+      plan: 'free',
       createdAt: Date.now(),
     },
     [`invites/${encoded}`]: {
@@ -76,6 +77,11 @@ export function sendOwnerInvite(email, origin) {
 /** Renames a bakery (superadmin override). */
 export function renameBakery(bakeryId, name) {
   return update(ref(db, `bakeries/${bakeryId}/info`), { name: name.trim() })
+}
+
+/** Sets a bakery's plan ('free' | 'pro'). Superadmin-only per security rules. */
+export function setPlan(bakeryId, plan) {
+  return update(ref(db, `bakeries/${bakeryId}/info`), { plan })
 }
 
 /** Deletes a bakery, unlinks its owner, removes the invite, and revokes the

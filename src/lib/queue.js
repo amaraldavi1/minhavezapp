@@ -44,6 +44,7 @@ export async function createBakery(uid, email, name) {
     info: {
       name: name.trim(),
       ownerUid: uid,
+      plan: 'free',
       createdAt: Date.now(),
     },
     ...emptyQueue(),

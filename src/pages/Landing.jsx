@@ -57,9 +57,9 @@ export default function Landing() {
           className="btn btn-primary btn-huge w-full"
           onClick={() => navigate('/painel/login')}
         >
-          Acessar painel →
+          Criar conta grátis →
         </button>
-        <p className="landing-owner-hint">Para gestores e atendentes</p>
+        <p className="landing-owner-hint">Grátis para começar · Sem cartão de crédito</p>
       </div>
 
       <div className="landing-steps">
